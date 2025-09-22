@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>지도 팝업</title>
+  <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=2278e94962c04d2d83db71afc2b3d2e5&libraries=services"></script>
+  <style>
+    html, body, #map {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+    }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+  <script>
+    // URL 파라미터에서 경기 데이터 가져오기
+    const urlParams = new URLSearchParams(window.location.search);
+    const matchesData = urlParams.get('matches');
+    
+    let recommendedMatches = [];
+    if (matchesData) {
+      try {
+        recommendedMatches = JSON.parse(decodeURIComponent(matchesData));
+      } catch (e) {
+        console.error('경기 데이터 파싱 실패:', e);
+        // 기본 데이터 사용
+        recommendedMatches = [
+          { id: "1", time: "10:00", location: "경기도 수원시 장안구 경수대로 976번길22", type: "야외", teams: "남녀모두 - 6vs6", status: "closed" },
+          { id: "2", time: "10:00", location: "충청북도 충주시 충원대로 268", type: "실내", teams: "남녀모두 - 5vs5", status: "open" }
+        ];
+      }
+    } else {
+      // 기본 데이터 사용
+      recommendedMatches = [
+        { id: "1", time: "10:00", location: "경기도 수원시 장안구 경수대로 976번길22", type: "야외", teams: "남녀모두 - 6vs6", status: "closed" },
+        { id: "2", time: "10:00", location: "충청북도 충주시 충원대로 268", type: "실내", teams: "남녀모두 - 5vs5", status: "open" }
+      ];
+    }
+
+    const mapContainer = document.getElementById('map');
+    const mapOption = {
+      center: new kakao.maps.LatLng(37.5665, 126.978), // 서울 중심 좌표
+      level: 7
+    };
+
+    const map = new kakao.maps.Map(mapContainer, mapOption);
+    const geocoder = new kakao.maps.services.Geocoder();
+    const bounds = new kakao.maps.LatLngBounds();
+
+    recommendedMatches.forEach((match, index) => {
+      geocoder.addressSearch(match.location, (result, status) => {
+        if (status === kakao.maps.services.Status.OK) {
+          const coords = new kakao.maps.LatLng(result[0].y, result[0].x);
+          
+          // 마커 생성
+          const marker = new kakao.maps.Marker({
+            map: map,
+            position: coords
+          });
+
+          // 인포윈도우 생성
+          const infowindow = new kakao.maps.InfoWindow({
+            content: `
+              <div style="padding: 15px; min-width: 250px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+                <div style="display: flex; align-items: center; margin-bottom: 12px;">
+                  <div style="width: 8px; height: 8px; border-radius: 50%; background-color: ${match.status === 'open' ? '#4CAF50' : '#FF5722'}; margin-right: 8px;"></div>
+                  <span style="font-size: 12px; color: ${match.status === 'open' ? '#4CAF50' : '#FF5722'}; font-weight: 600; text-transform: uppercase;">
+                    ${match.status === 'open' ? '모집중' : '마감'}
+                  </span>
+                </div>
+                <h3 style="margin: 0 0 8px 0; color: #333; font-size: 16px; font-weight: 600;">${match.teams}</h3>
+                <div style="margin-bottom: 8px;">
+                  <span style="color: #666; font-size: 13px;">⏰ ${match.time}</span>
+                </div>
+                <div style="margin-bottom: 8px;">
+                  <span style="color: #666; font-size: 13px;">📍 ${match.location}</span>
+                </div>
+                <div style="margin-bottom: 0;">
+                  <span style="color: #666; font-size: 13px;">🏟️ ${match.type}</span>
+                </div>
+              </div>
+            `,
+            removable: true,
+            zIndex: 1000
+          });
+
+          // 마커 클릭 시 인포윈도우 표시
+          kakao.maps.event.addListener(marker, 'click', function() {
+            infowindow.open(map, marker);
+          });
+
+          bounds.extend(coords);
+          
+          // 모든 마커가 추가된 후 지도 범위 조정
+          if (index === recommendedMatches.length - 1) {
+            map.setBounds(bounds);
+          }
+        } else {
+          console.error("주소 검색 실패 - 팝업", match.location, status);
+        }
+      });
+    });
+  </script>
+</body>
+</html>

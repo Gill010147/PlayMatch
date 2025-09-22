@@ -1,0 +1,46 @@
+.recommended-matches h2 {
+  font-weight: 700;
+  font-size: 20px;
+  margin-bottom: 12px;
+}
+
+.recommended-matches .match-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-bottom: 1px solid #ddd;
+  align-items: center;
+}
+
+.recommended-matches .match-time {
+  width: 60px;
+  font-weight: 600;
+}
+
+.recommended-matches .match-location {
+  flex-grow: 1;
+  margin-left: 12px;
+}
+
+.recommended-matches .match-detail {
+  color: gray;
+  margin-left: 12px;
+  font-size: 14px;
+}
+
+.recommended-matches button {
+  padding: 6px 14px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.recommended-matches button:disabled {
+  cursor: not-allowed;
+  background-color: #f38b82;
+  color: white;
+}
+
+.recommended-matches button:not(:disabled) {
+  background-color: rgb(110, 169, 237);
+  color: white;
+}
