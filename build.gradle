@@ -1,0 +1,44 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.3.2' // 안정적인 버전으로 명시
+	id 'io.spring.dependency-management' version '1.1.5' // 버전에 맞게 조정
+}
+
+group = 'com.playmatch'
+version = '0.0.1-SNAPSHOT'
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(17)
+	}
+}
+
+repositories {
+	flatDir {
+		dirs 'libs' // <-- 'libs' 폴더를 라이브러리 저장소로 사용하겠다고 선언
+	}
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+	runtimeOnly 'org.postgresql:postgresql'
+
+	// JWT (인터넷 대신 로컬 파일에서 직접 가져오도록 변경)
+	implementation name: 'jjwt-api-0.11.5' // .jar 확장자는 생략
+	runtimeOnly name: 'jjwt-impl-0.11.5'
+	runtimeOnly name: 'jjwt-jackson-0.11.5'
+
+    compileOnly 'org.projectlombok:lombok:1.18.30'
+    annotationProcessor 'org.projectlombok:lombok:1.18.30'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	        testImplementation 'org.springframework.security:spring-security-test'
+	        testImplementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server' // JWT 테스트 유틸리티에 필요
+	        testRuntimeOnly 'com.h2database:h2'}
+tasks.named('test') {
+	useJUnitPlatform()
+}

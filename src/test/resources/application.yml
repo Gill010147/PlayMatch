@@ -1,0 +1,34 @@
+spring:
+  profiles:
+    active: test
+  datasource:
+    url: jdbc:postgresql://localhost:5434/playmatch_db
+    username: playmatch_user
+    password: ghkdqudrlf69150@@
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: create
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  # Add Redis config for test environment
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+jwt:
+  secret:
+    key: c3ByaW5nLWJvb3Qtc2VjdXJpdHktand0LXR1dG9yaWFsLWppd3QtdHV0b3JpYWwtc3ByaW5nLWJvb3Qtc2VjdXJpdHkK
+  token:
+    expiration-time: 3600000
+
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
