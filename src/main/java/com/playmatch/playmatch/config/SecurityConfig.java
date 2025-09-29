@@ -43,6 +43,8 @@ public class SecurityConfig {
 
         http.authorizeHttpRequests((authorizeHttprequests) ->
                 authorizeHttprequests
+                        .requestMatchers("/ws-stomp/**").permitAll() // WebSocket 연결 경로 허용
+                        .requestMatchers("/chat.html").permitAll() // 채팅 테스트 페이지 허용
                         .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
                         .requestMatchers("/api/**").permitAll() // 테스트를 위해 임시로 모든 api 요청 허용
                         .requestMatchers("/api/users/**").permitAll()
