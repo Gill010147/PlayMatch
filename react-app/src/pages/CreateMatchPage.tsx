@@ -1,19 +1,51 @@
 import React, { useState } from "react";
 import logo from "../logo.png";
+import { MatchesService } from "../services/api";
+
+declare global {
+  interface Window {
+    daum: any;
+  }
+}
 
 export default function CreateMatchPage() {
   const [title, setTitle] = useState("");
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
   const [location, setLocation] = useState("");
+  const [duration, setDuration] = useState<string>("60");
   const [type, setType] = useState("실내");
   const [teamFormat, setTeamFormat] = useState("5vs5");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Submit logic (API integration)
-    alert("경기가 생성되었습니다. (데모)");
+    const teams = `남녀모두 - ${teamFormat}`;
+    const datetime = date && time ? `${date} ${time}` : time;
+    await MatchesService.create({
+      time: datetime,
+      location,
+      type,
+      teams,
+      status: "open",
+      title,
+      date,
+      duration,
+    });
+    alert("경기가 생성되었습니다.");
     window.history.back();
+  };
+
+  const openAddressSearch = () => {
+    if (!window.daum || !window.daum.Postcode) {
+      alert("주소 검색 스크립트가 로드되지 않았습니다. 잠시 후 다시 시도해주세요.");
+      return;
+    }
+    new window.daum.Postcode({
+      oncomplete: (data: any) => {
+        const addr = data.roadAddress || data.jibunAddress || data.address || "";
+        if (addr) setLocation(addr);
+      },
+    }).open();
   };
 
   return (
@@ -67,15 +99,32 @@ export default function CreateMatchPage() {
           </div>
 
           <label style={{ display: "grid", gap: 6 }}>
-            <span>장소</span>
+            <span>진행 시간(분)</span>
             <input
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-              placeholder="주소 또는 구장명"
+              type="number"
+              min={10}
+              step={10}
+              value={duration}
+              onChange={(e) => setDuration(e.target.value)}
+              placeholder="예: 60"
               style={{ padding: 10, borderRadius: 8, border: "1px solid #ddd" }}
               required
             />
           </label>
+
+          <div style={{ display: "grid", gap: 6 }}>
+            <span>장소 (주소 검색)</span>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: 8 }}>
+              <input
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                placeholder="주소를 검색하세요"
+                style={{ padding: 10, borderRadius: 8, border: "1px solid #ddd" }}
+                required
+              />
+              <button type="button" onClick={openAddressSearch} style={{ padding: "10px 12px" }}>주소검색</button>
+            </div>
+          </div>
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
             <label style={{ display: "grid", gap: 6 }}>

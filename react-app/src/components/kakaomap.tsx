@@ -22,6 +22,8 @@ declare global {
 
 export default function KakaoMap({ matches }: KakaoMapProps) {
   const mapRef = useRef<any>(null);
+  const markersRef = useRef<any[]>([]);
+  const infoWindowsRef = useRef<any[]>([]);
 
   useEffect(() => {
     const { kakao } = window;
@@ -44,8 +46,19 @@ export default function KakaoMap({ matches }: KakaoMapProps) {
     }
     const map = mapRef.current;
 
+    // 기존 마커/인포윈도우 제거
+    if (markersRef.current.length) {
+      markersRef.current.forEach((m) => m.setMap(null));
+      markersRef.current = [];
+    }
+    if (infoWindowsRef.current.length) {
+      infoWindowsRef.current.forEach((w) => w.close());
+      infoWindowsRef.current = [];
+    }
+
     const geocoder = new kakao.maps.services.Geocoder();
     const bounds = new kakao.maps.LatLngBounds();
+    let hasAnyVisible = false;
 
     matches.forEach(match => {
       geocoder.addressSearch(match.location, (result: any, status: any) => {
@@ -89,13 +102,24 @@ export default function KakaoMap({ matches }: KakaoMapProps) {
             infowindow.open(map, marker);
           });
 
+          markersRef.current.push(marker);
+          infoWindowsRef.current.push(infowindow);
           bounds.extend(coords);
-          map.setBounds(bounds);
+          hasAnyVisible = true;
         } else {
           console.warn(`주소 검색 실패: ${match.location}`);
         }
+        // 모든 주소 검색 콜백이 비동기로 들어오므로, 현재 콜백에서도 bounds가 갱신될 때마다 지도 범위를 맞춰준다
+        if (hasAnyVisible) {
+          map.setBounds(bounds);
+        }
       });
     });
+    // matches가 빈 배열인 경우 지도 범위만 초기화 (마커는 위에서 이미 제거됨)
+    if (!matches.length) {
+      // 선택적으로 기본 중심으로 이동하고 확대 레벨 설정
+      map.setLevel(7);
+    }
   }, [matches]);
 
   const handlePopupClick = () => {

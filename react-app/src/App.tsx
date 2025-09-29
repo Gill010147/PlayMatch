@@ -1,40 +1,38 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import NavBar from "./components/NavBar";
 import KakaoMap from "./components/kakaomap";
 import Banner from "./components/Banner";
 import RecommendedMatchList from "./components/recommendmatch";
+import { MatchesService } from "./services/api";
 
 import "./App.css";
 
-const recommendedMatches = [
-  {
-    id: "1",
-    time: "10:00",
-    location: "경기도 수원시 장안구 경수대로 976번길22",
-    type: "야외",
-    teams: "남녀모두 - 6vs6",
-    status: "closed",
-  },
-  {
-    id: "2",
-    time: "10:00",
-    location: "충청북도 충주시 충원대로 268",
-    type: "실내",
-    teams: "남녀모두 - 5vs5",
-    status: "open",
-  },
-];
+const recommendedMatches: any[] = [];
 
 function App() {
-  const [matches] = useState(recommendedMatches);
+  const [matches, setMatches] = useState(recommendedMatches);
   const navigate = useNavigate();
 
-  // 새 팝업창 열기 함수
+  useEffect(() => {
+    const init = async () => {
+      const alreadyCleared = localStorage.getItem("playmatch.clearedOnce");
+      if (!alreadyCleared) {
+        MatchesService.clearAll();
+        localStorage.setItem("playmatch.clearedOnce", "1");
+      }
+      const list = await MatchesService.list();
+      setMatches(list as any);
+    };
+    init();
+  }, []);
+
+  // 새 팝업창 열기 함수 (현재 매치 데이터를 함께 전달)
   const openMapPopup = () => {
+    const matchesParam = encodeURIComponent(JSON.stringify(matches));
     window.open(
-      "/popup-map.html", // 실제로 public 폴더에 popup-map.html 파일 있어야 함
+      `/popup-map.html?matches=${matchesParam}`,
       "MapPopup",
       "width=900,height=700,resizable=yes,scrollbars=yes"
     );

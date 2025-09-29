@@ -25,6 +25,7 @@ const NavBar: React.FC = () => {
         src={logo}
         alt="Play Match Logo"
         style={{ height: "72px" }}
+        onClick={() => navigate('/')}
       />
 
       {/* 로그인 + 아이콘 버튼 (오른쪽 상단 고정) */}
@@ -76,25 +77,26 @@ const NavBar: React.FC = () => {
           gap: "150px",
         }}
       >
-        <a href="#" className="nav-link nav-menu-item">
+        <button onClick={() => navigate('/matches')} className="nav-link nav-menu-item" style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
           <img src={soccerball} alt="축구 아이콘" className="nav-menu-icon" />
-          <div>축구</div>
-          <div className="nav-menu-eng">Match</div>
-        </a>
-        <a href="#" className="nav-link nav-menu-item">
+          <div>경기목록</div>
+          <div className="nav-menu-eng">Matches</div>
+        </button>
+        <button onClick={() => navigate('/recommendations/players')} className="nav-link nav-menu-item" style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
           <img src={futsal} alt="풋살 아이콘" className="nav-menu-icon" />
-          <div>풋살</div>
-          <div className="nav-menu-eng">Match</div>
-        </a>
-        <a href="#" className="nav-link nav-menu-item">
+          <div>용병추천</div>
+          <div className="nav-menu-eng">Recommend</div>
+        </button>
+        <button onClick={() => navigate('/chat/rooms')} className="nav-link nav-menu-item" style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
           <img src={team} alt="팀원 아이콘" className="nav-menu-icon" />
-          <div>팀원</div>
-          <div className="nav-menu-eng">Match</div>
-        </a>
-        <a href="#" className="nav-link nav-menu-item">
+          <div>채팅</div>
+          <div className="nav-menu-eng">Chat</div>
+        </button>
+        <button onClick={() => navigate('/reviews/create')} className="nav-link nav-menu-item" style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
           <img src={feedback} alt="피드백 아이콘" className="nav-menu-icon" />
-          <div>피드백</div>
-        </a>
+          <div>리뷰작성</div>
+          <div className="nav-menu-eng">Review</div>
+        </button>
       </nav>
     </header>
   );

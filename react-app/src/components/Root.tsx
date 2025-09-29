@@ -6,17 +6,154 @@ import SignupPage from "../pages/SignupPage";
 import MapPopupPage from "../pages/MapPopupPage";
 import MyPage from "../pages/MyPage";
 import CreateMatchPage from "../pages/CreateMatchPage";
+import MatchesListPage from "../pages/matches/MatchesListPage";
+import MatchDetailPage from "../pages/matches/MatchDetailPage";
+import RecommendationsPlayersPage from "../pages/recommendations/RecommendationsPlayersPage";
+import UserProfilePage from "../pages/profiles/UserProfilePage";
+import EditMyProfilePage from "../pages/profiles/EditMyProfilePage";
+import TeamProfilePage from "../pages/profiles/TeamProfilePage";
+import EditTeamProfilePage from "../pages/profiles/EditTeamProfilePage";
+import FacilityProfilePage from "../pages/profiles/FacilityProfilePage";
+import ChatRoomsPage from "../pages/chat/ChatRoomsPage";
+import ChatRoomPage from "../pages/chat/ChatRoomPage";
+import CreateReviewPage from "../pages/reviews/CreateReviewPage";
+import UserReviewsPage from "../pages/reviews/UserReviewsPage";
+import TeamReviewsPage from "../pages/reviews/TeamReviewsPage";
+import HeaderLogo from "./HeaderLogo";
 
 export default function Root() {
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<App />} />
+        {/* Wrap non-home routes to always show header logo */}
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
         <Route path="/mappopup" element={<MapPopupPage />} />
         <Route path="/mypage" element={<MyPage />} />
         <Route path="/create-match" element={<CreateMatchPage />} />
+        {/* Matches */}
+        <Route
+          path="/matches"
+          element={
+            <>
+              <HeaderLogo />
+              <MatchesListPage />
+            </>
+          }
+        />
+        <Route
+          path="/matches/:matchId"
+          element={
+            <>
+              <HeaderLogo />
+              <MatchDetailPage />
+            </>
+          }
+        />
+        {/* Recommendations */}
+        <Route
+          path="/recommendations/players"
+          element={
+            <>
+              <HeaderLogo />
+              <RecommendationsPlayersPage />
+            </>
+          }
+        />
+        {/* Profiles */}
+        <Route
+          path="/profiles/users/:userId"
+          element={
+            <>
+              <HeaderLogo />
+              <UserProfilePage />
+            </>
+          }
+        />
+        <Route
+          path="/profiles/users/me/edit"
+          element={
+            <>
+              <HeaderLogo />
+              <EditMyProfilePage />
+            </>
+          }
+        />
+        <Route
+          path="/profiles/teams/:teamId"
+          element={
+            <>
+              <HeaderLogo />
+              <TeamProfilePage />
+            </>
+          }
+        />
+        <Route
+          path="/profiles/teams/:teamId/edit"
+          element={
+            <>
+              <HeaderLogo />
+              <EditTeamProfilePage />
+            </>
+          }
+        />
+        <Route
+          path="/profiles/facilities/:facilityId"
+          element={
+            <>
+              <HeaderLogo />
+              <FacilityProfilePage />
+            </>
+          }
+        />
+        {/* Chat */}
+        <Route
+          path="/chat/rooms"
+          element={
+            <>
+              <HeaderLogo />
+              <ChatRoomsPage />
+            </>
+          }
+        />
+        <Route
+          path="/chat/rooms/:roomId"
+          element={
+            <>
+              <HeaderLogo />
+              <ChatRoomPage />
+            </>
+          }
+        />
+        {/* Reviews */}
+        <Route
+          path="/reviews/create"
+          element={
+            <>
+              <HeaderLogo />
+              <CreateReviewPage />
+            </>
+          }
+        />
+        <Route
+          path="/reviews/users/:userId"
+          element={
+            <>
+              <HeaderLogo />
+              <UserReviewsPage />
+            </>
+          }
+        />
+        <Route
+          path="/reviews/teams/:teamId"
+          element={
+            <>
+              <HeaderLogo />
+              <TeamReviewsPage />
+            </>
+          }
+        />
       </Routes>
     </BrowserRouter>
   );
