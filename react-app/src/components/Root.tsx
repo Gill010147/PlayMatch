@@ -16,7 +16,7 @@ import EditTeamProfilePage from "../pages/profiles/EditTeamProfilePage";
 import FacilityProfilePage from "../pages/profiles/FacilityProfilePage";
 import ChatRoomsPage from "../pages/chat/ChatRoomsPage";
 import ChatRoomPage from "../pages/chat/ChatRoomPage";
-import CreateReviewPage from "../pages/reviews/CreateReviewPage";
+import FeedbackPage from "../pages/reviews/FeedbackPage";
 import UserReviewsPage from "../pages/reviews/UserReviewsPage";
 import TeamReviewsPage from "../pages/reviews/TeamReviewsPage";
 import HeaderLogo from "./HeaderLogo";
@@ -126,13 +126,13 @@ export default function Root() {
             </>
           }
         />
-        {/* Reviews */}
+        {/* Feedback */}
         <Route
-          path="/reviews/create"
+          path="/feedback"
           element={
             <>
               <HeaderLogo />
-              <CreateReviewPage />
+              <FeedbackPage />
             </>
           }
         />

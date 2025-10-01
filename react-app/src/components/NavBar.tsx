@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import "./NavBar.css";
 import logo from "../logo.png"; // 위치에 맞게 수정
 import soccerball from './soccerball.webp';
@@ -9,6 +10,38 @@ import feedback from './feedback.png';
 
 const NavBar: React.FC = () => {
   const navigate = useNavigate();
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+
+  useEffect(() => {
+    const updateAuthState = () => {
+      setIsLoggedIn(!!localStorage.getItem("token"));
+    };
+    // 초기 상태 동기화
+    updateAuthState();
+    // 커스텀 이벤트 및 storage 이벤트 수신
+    const onAuthChanged = () => updateAuthState();
+    window.addEventListener("auth:changed", onAuthChanged as EventListener);
+    window.addEventListener("storage", onAuthChanged as EventListener);
+    return () => {
+      window.removeEventListener("auth:changed", onAuthChanged as EventListener);
+      window.removeEventListener("storage", onAuthChanged as EventListener);
+    };
+  }, []);
+
+  // 로그아웃 API 호출
+  const handleLogout = async () => {
+    try {
+      await axios.post("/api/auth/logout"); // 백엔드 세션/토큰 무효화 요청
+    } catch (error) {
+      console.error("서버 로그아웃 실패:", error);
+      // 서버 에러가 나더라도 클라이언트 쪽에서는 토큰 제거
+    } finally {
+      localStorage.removeItem("token");
+      window.dispatchEvent(new Event("auth:changed"));
+      navigate("/login"); // 로그아웃 후 로그인 페이지로 이동
+    }
+  };
+
   return (
     <header
       className="navbar"
@@ -24,11 +57,11 @@ const NavBar: React.FC = () => {
       <img
         src={logo}
         alt="Play Match Logo"
-        style={{ height: "72px" }}
+        style={{ height: "72px", cursor: "pointer" }}
         onClick={() => navigate('/')}
       />
 
-      {/* 로그인 + 아이콘 버튼 (오른쪽 상단 고정) */}
+      {/* 로그인/로그아웃 + 아이콘 버튼 */}
       <div
         className="nav-login"
         style={{
@@ -40,13 +73,23 @@ const NavBar: React.FC = () => {
           gap: "12px",
         }}
       >
-        <button
-          className="login-text"
-          style={{ fontWeight: "500", fontSize: "16px", background: "none", border: "none", cursor: "pointer" }}
-          onClick={() => navigate('/login')}
-        >
-          로그인
-        </button>
+        {isLoggedIn ? (
+          <button
+            className="login-text"
+            style={{ fontWeight: "500", fontSize: "16px", background: "none", border: "none", cursor: "pointer" }}
+            onClick={handleLogout}
+          >
+            로그아웃
+          </button>
+        ) : (
+          <button
+            className="login-text"
+            style={{ fontWeight: "500", fontSize: "16px", background: "none", border: "none", cursor: "pointer" }}
+            onClick={() => navigate('/login')}
+          >
+            로그인
+          </button>
+        )}
         <button className="icon-button" aria-label="마이페이지" onClick={() => navigate('/mypage')}>
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -92,10 +135,10 @@ const NavBar: React.FC = () => {
           <div>채팅</div>
           <div className="nav-menu-eng">Chat</div>
         </button>
-        <button onClick={() => navigate('/reviews/create')} className="nav-link nav-menu-item" style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+        <button onClick={() => navigate('/feedback')} className="nav-link nav-menu-item" style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
           <img src={feedback} alt="피드백 아이콘" className="nav-menu-icon" />
-          <div>리뷰작성</div>
-          <div className="nav-menu-eng">Review</div>
+          <div>피드백</div>
+          <div className="nav-menu-eng">Feedback</div>
         </button>
       </nav>
     </header>

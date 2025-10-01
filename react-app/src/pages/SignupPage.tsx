@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
 import "./SignupPage.css";
 import logoImg from "../logo.png";
 
@@ -81,26 +82,32 @@ export default function SignupPage() {
     }).open();
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // 회원가입 API 호출
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!isValid) return;
 
-    const profile = {
-      email,
-      name,
-      birth: { year, month, day },
-      gender,
-      phone,
-      positions,
-      playStyles,
-      skills,
-      region: { city, district, neighborhood, fullAddress },
-    };
     try {
-      localStorage.setItem("userProfile", JSON.stringify(profile));
-    } catch {}
-    alert("회원가입이 완료되었습니다.");
-    navigate("/");
+      const response = await axios.post("/api/auth/register", {
+        email,
+        password,
+        name,
+        birth: `${year}-${month}-${day}`,
+        gender,
+        phone,
+        positions,
+        playStyles,
+        skills,
+        region: { city, district, neighborhood, fullAddress },
+      });
+
+      alert("회원가입 성공!");
+      console.log("회원가입 응답:", response.data);
+      navigate("/"); // 성공 시 메인으로 이동
+    } catch (error: any) {
+      console.error(error);
+      alert("회원가입 실패: " + (error.response?.data?.message || "알 수 없는 오류"));
+    }
   };
 
   return (
@@ -138,7 +145,6 @@ export default function SignupPage() {
           <input type="text" placeholder="이름을 입력하세요" value={name} onChange={e => setName(e.target.value)} />
         </label>
 
-        
         <div className="field-group">
           <span className="label">지역</span>
           <div className="row gap">

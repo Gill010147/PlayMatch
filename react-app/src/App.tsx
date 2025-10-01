@@ -9,10 +9,8 @@ import { MatchesService } from "./services/api";
 
 import "./App.css";
 
-const recommendedMatches: any[] = [];
-
 function App() {
-  const [matches, setMatches] = useState(recommendedMatches);
+  const [matches, setMatches] = useState<any[]>([]);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -22,9 +20,17 @@ function App() {
         MatchesService.clearAll();
         localStorage.setItem("playmatch.clearedOnce", "1");
       }
-      const list = await MatchesService.list();
-      setMatches(list as any);
+
+      try {
+        const list = await MatchesService.list();
+        // ✅ list가 undefined/null이어도 안전하게 처리
+        setMatches(Array.isArray(list) ? list : []);
+      } catch (err) {
+        console.error("매치 목록 불러오기 실패:", err);
+        setMatches([]); // 실패 시에도 빈 배열 유지
+      }
     };
+
     init();
   }, []);
 

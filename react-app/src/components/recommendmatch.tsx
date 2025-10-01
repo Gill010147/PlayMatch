@@ -1,5 +1,5 @@
 import React from "react";
-import './recommendmatch.css';
+import "./recommendmatch.css";
 
 interface Match {
   id: string;
@@ -11,29 +11,33 @@ interface Match {
 }
 
 interface RecommendedMatchListProps {
-  matches: Match[];
+  matches?: Match[]; // ✅ optional 처리
 }
 
-const RecommendedMatchList: React.FC<RecommendedMatchListProps> = ({ matches }) => {
+const RecommendedMatchList: React.FC<RecommendedMatchListProps> = ({ matches = [] }) => {
   return (
     <section className="recommended-matches">
       <h2>추천 Match</h2>
       <ul>
-        {matches.map((match) => (
-          <li
-            key={match.id}
-            className={`match-item ${match.status === "closed" ? "closed" : "open"}`}
-          >
-            <span className="match-time">{match.time}</span>
-            <span className="match-location">{match.location}</span>
-            <span className="match-detail">
-              {match.type} • {match.teams}
-            </span>
-            <button disabled={match.status === "closed"}>
-              {match.status === "closed" ? "마감임박!" : "신청가능"}
-            </button>
-          </li>
-        ))}
+        {matches.length === 0 ? (
+          <li className="no-matches">추천 매치가 없습니다.</li>
+        ) : (
+          matches.map((match) => (
+            <li
+              key={match.id}
+              className={`match-item ${match.status === "closed" ? "closed" : "open"}`}
+            >
+              <span className="match-time">{match.time}</span>
+              <span className="match-location">{match.location}</span>
+              <span className="match-detail">
+                {match.type} • {match.teams}
+              </span>
+              <button disabled={match.status === "closed"}>
+                {match.status === "closed" ? "마감임박!" : "신청가능"}
+              </button>
+            </li>
+          ))
+        )}
       </ul>
     </section>
   );

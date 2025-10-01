@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import logo from "../logo.png";
+import { useNavigate } from "react-router-dom";
 import { MatchesService } from "../services/api";
 
 declare global {
@@ -9,6 +10,7 @@ declare global {
 }
 
 export default function CreateMatchPage() {
+  const navigate = useNavigate();
   const [title, setTitle] = useState("");
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
@@ -16,23 +18,39 @@ export default function CreateMatchPage() {
   const [duration, setDuration] = useState<string>("60");
   const [type, setType] = useState("실내");
   const [teamFormat, setTeamFormat] = useState("5vs5");
+  const [saving, setSaving] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const teams = `남녀모두 - ${teamFormat}`;
-    const datetime = date && time ? `${date} ${time}` : time;
-    await MatchesService.create({
-      time: datetime,
-      location,
-      type,
-      teams,
-      status: "open",
-      title,
-      date,
-      duration,
-    });
-    alert("경기가 생성되었습니다.");
-    window.history.back();
+    if (saving) return;
+    try {
+      setSaving(true);
+      // 간단 검증
+      if (!title || !date || !time || !location) {
+        alert("필수 항목을 모두 입력해주세요.");
+        return;
+      }
+      const teams = `남녀모두 - ${teamFormat}`;
+      const datetime = `${date} ${time}`;
+      await MatchesService.create({
+        time: datetime,
+        location,
+        type,
+        teams,
+        status: "open",
+        title,
+        date,
+        duration,
+      });
+      alert("경기가 생성되었습니다.");
+      navigate("/");
+    } catch (err: any) {
+      console.error(err);
+      const msg = err?.message || (typeof err === "string" ? err : JSON.stringify(err));
+      alert(`경기 생성 중 오류가 발생했습니다.\n${msg}`);
+    } finally {
+      setSaving(false);
+    }
   };
 
   const openAddressSearch = () => {
@@ -59,7 +77,12 @@ export default function CreateMatchPage() {
           marginTop: "30px",
         }}
       >
-        <img src={logo} alt="Play Match Logo" style={{ height: "72px" }} />
+        <img
+          src={logo}
+          alt="Play Match Logo"
+          style={{ height: "72px", cursor: "pointer" }}
+          onClick={() => navigate("/")}
+        />
       </header>
       <div style={{ maxWidth: 720, margin: "24px auto", padding: "0 16px" }}>
         <h2 style={{ marginBottom: 16 }}>경기 생성</h2>
@@ -165,8 +188,9 @@ export default function CreateMatchPage() {
               cursor: "pointer",
               fontWeight: 600,
             }}
+            disabled={saving}
           >
-            생성하기
+            {saving ? "생성 중…" : "생성하기"}
           </button>
         </form>
       </div>

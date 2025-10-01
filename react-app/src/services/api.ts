@@ -1,3 +1,4 @@
+// services/api.ts
 // Lightweight API client scaffolding for future integration
 // Backend teammate can replace baseUrl and implement real auth headers/interceptors
 
@@ -12,6 +13,7 @@ export interface ApiRequestOptions {
 }
 
 const baseUrl = import.meta.env.VITE_API_BASE_URL || ""; // e.g. "/api" or "https://api.example.com"
+const useMocks = String(import.meta.env.VITE_USE_MOCKS) === "true";
 
 function buildQueryString(query?: ApiRequestOptions["query"]): string {
   if (!query) return "";
@@ -28,8 +30,10 @@ export async function apiRequest<TResponse = unknown>(options: ApiRequestOptions
   const url = `${baseUrl}${path}${buildQueryString(query)}`;
 
   // NOTE: Auth header placeholder. Replace with real token retrieval when integrated.
+  const token = localStorage.getItem("token");
   const defaultHeaders: Record<string, string> = {
     "Content-Type": "application/json",
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
   };
 
   const res = await fetch(url, {
@@ -39,7 +43,6 @@ export async function apiRequest<TResponse = unknown>(options: ApiRequestOptions
     body: method === "GET" || method === "DELETE" ? undefined : JSON.stringify(body ?? {}),
   });
 
-  // Basic error surfacing; backend can standardize error shape later
   if (!res.ok) {
     let message: string | undefined;
     try {
@@ -49,7 +52,6 @@ export async function apiRequest<TResponse = unknown>(options: ApiRequestOptions
     throw new Error(message || `Request failed: ${res.status}`);
   }
 
-  // Handle empty responses gracefully
   const contentType = res.headers.get("content-type") || "";
   if (!contentType.includes("application/json")) {
     // @ts-expect-error allow unknown return type when not json
@@ -58,18 +60,50 @@ export async function apiRequest<TResponse = unknown>(options: ApiRequestOptions
   return (await res.json()) as TResponse;
 }
 
-// Domain-specific stub services (can be replaced with real endpoints)
+// ---------------------- Domain-specific Services ----------------------
+
 export const AuthService = {
-  register: async (_payload: unknown) => Promise.resolve({} as any),
-  login: async (_payload: unknown) => Promise.resolve({} as any),
-  logout: async () => Promise.resolve({} as any),
-  me: async () => Promise.resolve({} as any),
+  register: async (payload: any) =>
+    apiRequest({ method: "POST", path: "/api/auth/register", body: payload }),
+  login: async (payload: any) =>
+    apiRequest({ method: "POST", path: "/api/auth/login", body: payload }),
+  logout: async () =>
+    apiRequest({ method: "POST", path: "/api/auth/logout" }),
+  me: async () =>
+    apiRequest({ method: "GET", path: "/api/users/me" }),
 };
 
-export const MatchesService = {
-  /**
-   * Local storage key for persisted matches
-   */
+export const ProfilesService = {
+  me: async () =>
+    apiRequest({ method: "GET", path: "/api/users/me" }),
+  updateMe: async (payload: any) =>
+    apiRequest({ method: "PUT", path: "/api/profiles/me", body: payload }),
+  getUser: async (userId: string) =>
+    apiRequest({ method: "GET", path: `/api/profiles/users/${userId}` }),
+  getTeam: async (teamId: string) =>
+    apiRequest({ method: "GET", path: `/api/teams/${teamId}` }),
+  updateTeam: async (teamId: string, payload: any) =>
+    apiRequest({ method: "PUT", path: `/api/teams/${teamId}`, body: payload }),
+  getFacility: async (facilityId: string) =>
+    apiRequest({ method: "GET", path: `/api/facilities/${facilityId}` }),
+};
+
+// Real service
+const MatchesServiceHttp = {
+  list: async (filters?: Record<string, unknown>) =>
+    apiRequest({ method: "GET", path: "/api/matches", query: filters }),
+  create: async (payload: any) =>
+    apiRequest({ method: "POST", path: "/api/matches", body: payload }),
+  detail: async (matchId: string) =>
+    apiRequest({ method: "GET", path: `/api/matches/${matchId}` }),
+  applyAsMercenary: async (matchId: string, payload: any) =>
+    apiRequest({ method: "POST", path: `/api/matches/${matchId}/apply`, body: payload }),
+  participants: async (matchId: string) =>
+    apiRequest({ method: "GET", path: `/api/matches/${matchId}/participants` }),
+};
+
+// Mock (localStorage) service for dev without backend
+const MatchesServiceMock = {
   _storageKey: "playmatch.matches",
   _readAll(): any[] {
     try {
@@ -97,6 +131,9 @@ export const MatchesService = {
       type: payload?.type || "",
       teams: payload?.teams || "",
       status: payload?.status === "closed" ? "closed" : "open",
+      title: payload?.title || "",
+      date: payload?.date || "",
+      duration: payload?.duration || "",
     };
     list.unshift(match);
     this._writeAll(list);
@@ -112,52 +149,42 @@ export const MatchesService = {
   async participants(_matchId: string) {
     return [] as any;
   },
-  clearAll() {
-    this._writeAll([]);
-  },
-  pruneDefaults(defaults: any[]) {
-    const list = this._readAll();
-    if (!Array.isArray(defaults) || defaults.length === 0) return list;
-    const isDefault = (m: any) =>
-      defaults.some((d) =>
-        (d.id && m.id === d.id) ||
-        (
-          m.time === d.time &&
-          m.location === d.location &&
-          m.type === d.type &&
-          m.teams === d.teams
-        )
-      );
-    const filtered = list.filter((m) => !isDefault(m));
-    if (filtered.length !== list.length) this._writeAll(filtered);
-    return filtered;
-  },
 };
+
+export const MatchesService = useMocks ? MatchesServiceMock : MatchesServiceHttp;
 
 export const RecommendationsService = {
-  recommendPlayers: async (_payload: unknown) => Promise.resolve([] as any),
-};
-
-export const ProfilesService = {
-  getUser: async (_userId: string) => Promise.resolve({} as any),
-  updateMe: async (_payload: unknown) => Promise.resolve({} as any),
-  getTeam: async (_teamId: string) => Promise.resolve({} as any),
-  updateTeam: async (_teamId: string, _payload: unknown) => Promise.resolve({} as any),
-  getFacility: async (_facilityId: string) => Promise.resolve({} as any),
+  recommendPlayers: async (payload: any) =>
+    apiRequest({ method: "POST", path: "/api/recommendations/players", body: payload }),
 };
 
 export const ChatService = {
-  rooms: async () => Promise.resolve([] as any),
-  messages: async (_roomId: string) => Promise.resolve([] as any),
-  sendMessage: async (_roomId: string, _payload: unknown) => Promise.resolve({} as any),
+  // 내 채팅방 목록 조회
+  rooms: async () =>
+    apiRequest({ method: "GET", path: "/api/chat/my-rooms" }),
+  
+  // 1:1 채팅방 생성 또는 조회
+  createOrGetRoom: async (participantId: string) =>
+    apiRequest({ method: "POST", path: "/api/chat/rooms", body: { participantId } }),
+  
+  // 그룹 채팅방 생성
+  createGroupRoom: async (name: string, participantIds: string[]) =>
+    apiRequest({ method: "POST", path: "/api/chat/rooms", body: { name, participantIds, type: "group" } }),
+  
+  // 채팅방 과거 메시지 조회
+  messages: async (roomId: string) =>
+    apiRequest({ method: "GET", path: `/api/chat/rooms/${roomId}/messages` }),
+  
+  // 메시지 전송 (WebSocket 대신 HTTP로도 가능)
+  sendMessage: async (roomId: string, content: string) =>
+    apiRequest({ method: "POST", path: `/api/chat/rooms/${roomId}/messages`, body: { content } }),
 };
 
 export const ReviewsService = {
-  create: async (_payload: unknown) => Promise.resolve({} as any),
-  listUser: async (_userId: string) => Promise.resolve([] as any),
-  listTeam: async (_teamId: string) => Promise.resolve([] as any),
+  create: async (payload: any) =>
+    apiRequest({ method: "POST", path: "/api/reviews", body: payload }),
+  listUser: async (userId: string) =>
+    apiRequest({ method: "GET", path: `/api/reviews/users/${userId}` }),
+  listTeam: async (teamId: string) =>
+    apiRequest({ method: "GET", path: `/api/reviews/teams/${teamId}` }),
 };
-
-
-
-
