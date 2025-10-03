@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
+import { AuthService } from "../services/api";
 import "./LoginPage.css";
 import logoImg from "../logo.png";
 import kakaoLogo from "./kakaologo.jpeg";
@@ -15,13 +15,17 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await axios.post("/api/auth/login", {
-        email: id,        // 백엔드에서 요구하는 필드명 확인 필요
+      const token = await AuthService.login({
+        email: id,
         password: password,
       });
 
+      if (typeof token !== 'string' || !token) {
+        throw new Error("로그인에 실패했습니다: 유효하지 않은 토큰입니다.");
+      }
+
       // 로그인 성공 → 토큰 저장
-      localStorage.setItem("token", response.data.token);
+      localStorage.setItem("token", token);
 
       alert("로그인 성공!");
       // 전역 UI 업데이트 트리거
@@ -29,7 +33,7 @@ export default function LoginPage() {
       navigate("/"); // 메인 페이지로 이동
     } catch (error: any) {
       console.error(error);
-      alert("로그인 실패: " + (error.response?.data?.message || "알 수 없는 오류"));
+      alert("로그인 실패: " + (error.message || "알 수 없는 오류"));
     }
   };
 

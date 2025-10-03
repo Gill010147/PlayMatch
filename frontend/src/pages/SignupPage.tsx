@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
+import { AuthService } from "../services/api"; // axios 대신 AuthService 임포트
 import "./SignupPage.css";
 import logoImg from "../logo.png";
 
@@ -88,7 +88,7 @@ export default function SignupPage() {
     if (!isValid) return;
 
     try {
-      const response = await axios.post("/api/auth/register", {
+      const response = await AuthService.register({
         email,
         password,
         name,

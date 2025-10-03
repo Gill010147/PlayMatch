@@ -1,6 +1,7 @@
 package com.playmatch.playmatch.service;
 
 import com.playmatch.playmatch.domain.User;
+import com.playmatch.playmatch.domain.UserRoleEnum;
 import com.playmatch.playmatch.dto.LoginRequestDto;
 import com.playmatch.playmatch.dto.SignUpRequestDto;
 import com.playmatch.playmatch.dto.UserProfileResponseDto;
@@ -47,7 +48,7 @@ public class UserService {
                 .gender(requestDto.getGender())
                 .playStyle(requestDto.getPlayStyle())
                 .position(requestDto.getPosition())
-                .role(requestDto.getRole())
+                .role(UserRoleEnum.USER) // 기본 권한을 USER로 설정
                 .build();
 
         userRepository.save(user);

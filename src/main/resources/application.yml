@@ -27,6 +27,9 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update # 실행 시점에 DB 테이블을 엔티티에 맞게 업데이트
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect # Dialect 명시적 설정
   data:
     redis:
       host: localhost # 내 PC의 Docker Redis 주소

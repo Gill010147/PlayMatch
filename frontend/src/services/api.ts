@@ -53,11 +53,15 @@ export async function apiRequest<TResponse = unknown>(options: ApiRequestOptions
   }
 
   const contentType = res.headers.get("content-type") || "";
-  if (!contentType.includes("application/json")) {
-    // @ts-expect-error allow unknown return type when not json
-    return undefined;
+  if (contentType.includes("application/json")) {
+    return (await res.json()) as TResponse;
   }
-  return (await res.json()) as TResponse;
+  if (contentType.includes("text/plain")) {
+    return (await res.text()) as TResponse;
+  }
+
+  // @ts-expect-error allow unknown return type when not json
+  return undefined;
 }
 
 // ---------------------- Domain-specific Services ----------------------
