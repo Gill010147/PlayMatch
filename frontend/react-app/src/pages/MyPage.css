@@ -1,0 +1,138 @@
+.mypage-wrap {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 16px 16px 28px;
+}
+
+.mypage-top {
+  display: flex;
+  justify-content: center;
+}
+
+.mypage-logo {
+  height: 64px;
+}
+
+.mypage-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #57a455;
+  color: #fff;
+  border-radius: 12px;
+  padding: 18px 18px;
+}
+
+.profile-left .user-name {
+  font-size: 36px;
+  font-weight: 800;
+}
+
+.stars {
+  margin-top: 8px;
+  letter-spacing: 4px;
+  font-size: 24px;
+}
+
+.tags-row {
+  margin-top: 8px;
+  display: flex;
+  gap: 8px;
+}
+
+.tag {
+  background: rgba(0,0,0,0.25);
+  color: #fff;
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-weight: 700;
+}
+
+.meta-row {
+  display: flex;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.pill {
+  background: rgba(0,0,0,0.25);
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-weight: 700;
+}
+
+.profile-right {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.avatar {
+  width: 92px;
+  height: 92px;
+  border-radius: 9999px;
+  background: #ececec;
+}
+
+.team-btn {
+  background: #2f7efc;
+  color: #fff;
+  border: none;
+  border-radius: 16px;
+  padding: 6px 10px;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.card {
+  background: #f1f1f1;
+  border-radius: 12px;
+  margin-top: 16px;
+  padding: 14px 14px 18px;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 700;
+  color: #222;
+}
+
+.chev {
+  color: #7a7a7a;
+  font-size: 22px;
+}
+
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.chip {
+  display: inline-block;
+  background: #fff;
+  border-radius: 10px;
+  padding: 7px 14px;
+  color: #333;
+  font-weight: 700;
+  border: 1px solid #ddd;
+}
+
+.footer-action {
+  margin-top: 16px;
+}
+
+.save-btn {
+  width: 100%;
+  background: #4caf50;
+  color: #fff;
+  border: none;
+  padding: 10px 12px;
+  border-radius: 6px;
+  font-weight: 700;
+  cursor: pointer;
+}
