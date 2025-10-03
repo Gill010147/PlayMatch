@@ -99,7 +99,7 @@ export default function MyPage() {
 					className="edit-profile-btn"
 					style={{
 						padding: "10px 16px",
-						backgroundColor: "rgba(70, 55, 238, 1)",
+						backgroundColor: "#57a455",
 						color: "#fff",
 						border: "none",
 						borderRadius: 8,

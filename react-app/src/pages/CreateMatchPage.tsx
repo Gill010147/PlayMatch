@@ -181,7 +181,7 @@ export default function CreateMatchPage() {
             style={{
               marginTop: 8,
               padding: "12px 18px",
-              backgroundColor: "rgba(70, 55, 238, 1)",
+              backgroundColor: "#57a455",
               color: "#fff",
               border: "none",
               borderRadius: 10,

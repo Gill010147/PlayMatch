@@ -62,6 +62,21 @@ export interface Review {
   createdAt: string;
 }
 
+export interface Comment {
+  id: string;
+  userId: string;
+  userName: string;
+  content: string;
+  createdAt: string;
+}
+
+export interface VideoPost {
+  id: string;
+  title: string;
+  videoUrl: string;
+  comments: Comment[];
+}
+
 
 
 

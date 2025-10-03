@@ -190,10 +190,7 @@ export default function SignupPage() {
           <input type="tel" placeholder="휴대폰 번호를 입력하세요" value={phone} onChange={e => setPhone(e.target.value)} />
         </label>
 
-        <label className="field">
-          <span>인증 번호</span>
-          <input type="text" placeholder="인증 번호를 입력하세요" value={verification} onChange={e => setVerification(e.target.value)} />
-        </label>
+
 
         <h3 className="section-title">기본 프로필</h3>
 

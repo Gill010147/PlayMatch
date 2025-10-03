@@ -91,7 +91,7 @@ function App() {
           bottom: "24px",
           right: "24px",
           padding: "12px 18px",
-          backgroundColor: "rgba(70, 55, 238, 1)",
+          backgroundColor: "#57a455",
           color: "#fff",
           border: "none",
           borderRadius: "999px",
@@ -101,7 +101,7 @@ function App() {
           fontWeight: 600,
         }}
       >
-        경기생성
+        +
       </button>
     </>
   );

@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ProfilesService } from "../../services/api";
 import type { UserProfile } from "../../types/domain";
+import "./EditMyProfilePage.css";
 
 export default function EditMyProfilePage() {
   const navigate = useNavigate();
@@ -103,112 +104,130 @@ export default function EditMyProfilePage() {
   };
 
   return (
-    <div style={{ maxWidth: 720, margin: "24px auto", padding: "0 16px" }}>
-      <h2 style={{ marginBottom: 16 }}>내 프로필 수정</h2>
-      <form onSubmit={handleSave} style={{ display: "grid", gap: 16 }}>
-        {/* 이름 */}
-        <label style={{ display: "grid", gap: 6 }}>
-          <span>이름</span>
-          <input
-            value={form.name || ""}
-            onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-            placeholder="이름을 입력하세요"
-            style={{ padding: 10, borderRadius: 8, border: "1px solid #ddd" }}
-          />
-        </label>
-
-        {/* 지역 */}
-        <div style={{ display: "grid", gap: 8 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <span>지역</span>
-            <button type="button" onClick={openAddressSearch}>주소 검색</button>
-          </div>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+    <div className="edit-profile-container">
+      <div className="edit-profile-form">
+        <h2 className="form-title">내 프로필 수정</h2>
+        
+        <form onSubmit={handleSave}>
+          {/* 이름 */}
+          <div className="field">
+            <label className="label">이름</label>
             <input
-              placeholder="도시"
-              value={form.region?.city || ""}
-              onChange={(e) => setForm((f) => ({ ...f, region: { ...(f.region || {}), city: e.target.value } }))}
-            />
-            <input
-              placeholder="구/군"
-              value={form.region?.district || ""}
-              onChange={(e) => setForm((f) => ({ ...f, region: { ...(f.region || {}), district: e.target.value } }))}
+              value={form.name || ""}
+              onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+              placeholder="이름을 입력하세요"
             />
           </div>
-        </div>
 
-        {/* 생년월일 */}
-        <div style={{ display: "grid", gap: 8 }}>
-          <span>생년월일</span>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12 }}>
-            <select value={birthYear} onChange={(e) => setBirthYear(e.target.value)}>
-              <option value="">년도</option>
-              {years.map((y) => <option key={y} value={y}>{y}</option>)}
-            </select>
-            <select value={birthMonth} onChange={(e) => setBirthMonth(e.target.value)}>
-              <option value="">월</option>
-              {months.map((m) => <option key={m} value={m}>{m}</option>)}
-            </select>
-            <select value={birthDay} onChange={(e) => setBirthDay(e.target.value)}>
-              <option value="">일</option>
-              {days.map((d) => <option key={d} value={d}>{d}</option>)}
-            </select>
+          {/* 지역 */}
+          <div className="field-group">
+            <label className="label">지역</label>
+            <div className="row gap">
+              <input
+                placeholder="도시"
+                value={form.region?.city || ""}
+                onChange={(e) => setForm((f) => ({ ...f, region: { ...(f.region || {}), city: e.target.value } }))}
+              />
+              <input
+                placeholder="구/군"
+                value={form.region?.district || ""}
+                onChange={(e) => setForm((f) => ({ ...f, region: { ...(f.region || {}), district: e.target.value } }))}
+              />
+            </div>
+            <button type="button" className="address-search-btn" onClick={openAddressSearch}>
+              주소 검색
+            </button>
           </div>
-          <div>나이: {form.age ? `${form.age}세` : "미설정"}</div>
-        </div>
 
-        {/* 포지션 */}
-        <div>
-          <span>포지션</span>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-            {POSITION_OPTIONS.map((opt) => {
-              const selected = (form.positions || []).includes(opt);
-              return (
-                <button key={opt} type="button" onClick={() => toggleChip("positions", opt)}>
-                  {selected ? `✅ ${opt}` : opt}
-                </button>
-              );
-            })}
+          {/* 생년월일 */}
+          <div className="field-group">
+            <label className="label">생년월일</label>
+            <div className="grid-3">
+              <select value={birthYear} onChange={(e) => setBirthYear(e.target.value)}>
+                <option value="">년도</option>
+                {years.map((y) => <option key={y} value={y}>{y}</option>)}
+              </select>
+              <select value={birthMonth} onChange={(e) => setBirthMonth(e.target.value)}>
+                <option value="">월</option>
+                {months.map((m) => <option key={m} value={m}>{m}</option>)}
+              </select>
+              <select value={birthDay} onChange={(e) => setBirthDay(e.target.value)}>
+                <option value="">일</option>
+                {days.map((d) => <option key={d} value={d}>{d}</option>)}
+              </select>
+            </div>
+            <div className="age-display">
+              나이: {form.age ? `${form.age}세` : "미설정"}
+            </div>
           </div>
-        </div>
 
-        {/* 플레이 스타일 */}
-        <div>
-          <span>플레이 스타일</span>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-            {PLAYSTYLE_OPTIONS.map((opt) => {
-              const selected = (form.playStyles || []).includes(opt);
-              return (
-                <button key={opt} type="button" onClick={() => toggleChip("playStyles", opt)}>
-                  {selected ? `✅ ${opt}` : opt}
-                </button>
-              );
-            })}
+          {/* 포지션 */}
+          <div className="field-group">
+            <label className="label">포지션</label>
+            <div className="row gap">
+              {POSITION_OPTIONS.map((opt) => {
+                const selected = (form.positions || []).includes(opt);
+                return (
+                  <button 
+                    key={opt} 
+                    type="button" 
+                    className={`chip ${selected ? 'selected' : ''}`}
+                    onClick={() => toggleChip("positions", opt)}
+                  >
+                    {opt}
+                  </button>
+                );
+              })}
+            </div>
           </div>
-        </div>
 
-        {/* 자신있는 능력 */}
-        <div>
-          <span>자신있는 능력</span>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-            {SKILL_OPTIONS.map((opt) => {
-              const selected = (form.skills || []).includes(opt);
-              return (
-                <button key={opt} type="button" onClick={() => toggleChip("skills", opt)}>
-                  {selected ? `✅ ${opt}` : opt}
-                </button>
-              );
-            })}
+          {/* 플레이 스타일 */}
+          <div className="field-group">
+            <label className="label">플레이 스타일</label>
+            <div className="row gap">
+              {PLAYSTYLE_OPTIONS.map((opt) => {
+                const selected = (form.playStyles || []).includes(opt);
+                return (
+                  <button 
+                    key={opt} 
+                    type="button" 
+                    className={`chip ${selected ? 'selected' : ''}`}
+                    onClick={() => toggleChip("playStyles", opt)}
+                  >
+                    {opt}
+                  </button>
+                );
+              })}
+            </div>
           </div>
-        </div>
 
-        <div>
-          <button type="submit" disabled={saving}>
+          {/* 자신있는 능력 */}
+          <div className="field-group">
+            <label className="label">자신있는 능력</label>
+            <div className="row gap">
+              {SKILL_OPTIONS.map((opt) => {
+                const selected = (form.skills || []).includes(opt);
+                return (
+                  <button 
+                    key={opt} 
+                    type="button" 
+                    className={`chip ${selected ? 'selected' : ''}`}
+                    onClick={() => toggleChip("skills", opt)}
+                  >
+                    {opt}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <button type="submit" className="submit" disabled={saving}>
             {saving ? "저장 중…" : "저장"}
           </button>
-        </div>
-        {error && <div style={{ color: "red" }}>{error}</div>}
-      </form>
+          
+          {error && <div className="hint error">{error}</div>}
+        </form>
+      </div>
     </div>
   );
 }
