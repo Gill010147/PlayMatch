@@ -14,6 +14,8 @@ function App() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    console.log("VITE_API_BASE_URL:", import.meta.env.VITE_API_BASE_URL);
+    console.log("VITE_USE_MOCKS:", import.meta.env.VITE_USE_MOCKS);
     const init = async () => {
       try {
         const list = await MatchesService.list();
@@ -85,7 +87,7 @@ function App() {
           bottom: "24px",
           right: "24px",
           padding: "12px 18px",
-          backgroundColor: "rgba(70, 55, 238, 1)",
+          backgroundColor: "#16a34a",
           color: "#fff",
           border: "none",
           borderRadius: "999px",

@@ -179,10 +179,49 @@ const MatchesServiceMock = {
 
 export const MatchesService = useMocks ? MatchesServiceMock : MatchesServiceHttp;
 
-export const RecommendationsService = {
+// Real service
+const RecommendationsServiceHttp = {
   recommendPlayers: async (payload: any) =>
     apiRequest({ method: "POST", path: "/api/recommendations/players", body: payload }),
 };
+
+// Mock service
+const RecommendationsServiceMock = {
+  recommendPlayers: async (criteria: any) => {
+    console.log("Mock RecommendationsService.recommendPlayers called with:", criteria);
+    // Return the dummy players that are already defined in RecommendedPlayerDetailPage.tsx
+    // For simplicity, we'll just return a static list for now.
+    // In a real mock, you might filter based on criteria.
+    return [
+      {
+        id: "0",
+        name: "홍길동",
+        position: "FW",
+        playStyle: ["공격"],
+        ability: ["슛"],
+        region: "OO시 OO구",
+      },
+      {
+        id: "1",
+        name: "김철수",
+        position: "MF",
+        playStyle: ["수비"],
+        ability: ["패스"],
+        region: "XX시 XX구",
+      },
+      {
+        id: "2",
+        name: "이영희",
+        position: "DF",
+        playStyle: ["조율"],
+        ability: ["태클"],
+        region: "YY시 YY구",
+      },
+    ];
+  },
+};
+
+export const RecommendationsService = useMocks ? RecommendationsServiceMock : RecommendationsServiceHttp;
 
 export const ChatService = {
   // 내 채팅방 목록 조회
@@ -213,4 +252,105 @@ export const ReviewsService = {
     apiRequest({ method: "GET", path: `/api/reviews/users/${userId}` }),
   listTeam: async (teamId: string) =>
     apiRequest({ method: "GET", path: `/api/reviews/teams/${teamId}` }),
+};
+
+export const VideoFeedbackService = {
+  list: async () => {
+    // Mock data for video feedback list
+    return [
+      {
+        id: "1",
+        title: "경기 영상 피드백 1",
+        videoUrl: "https://www.w3schools.com/html/mov_bbb.mp4",
+        uploadDate: "2023-10-26",
+        commentsCount: 5,
+      },
+      {
+        id: "2",
+        title: "슈팅 자세 교정 요청",
+        videoUrl: "https://www.w3schools.com/html/movie.mp4",
+        uploadDate: "2023-10-25",
+        commentsCount: 12,
+      },
+    ];
+  },
+  detail: async (videoId: string) => {
+    // Mock data for video feedback detail
+    const comments = [
+      { id: "c1", author: "사용자 A", text: "정말 좋은 영상입니다!", timestamp: "2023-10-26 10:00" },
+      { id: "c2", author: "사용자 B", text: "이 부분에서 패스가 좋았어요.", timestamp: "2023-10-26 10:15" },
+    ];
+    return {
+      id: videoId,
+      title: `경기 영상 피드백 ${videoId}`,
+      videoUrl: videoId === "1" ? "https://www.w3schools.com/html/mov_bbb.mp4" : "https://www.w3schools.com/html/movie.mp4",
+      description: `이 영상은 경기 영상 피드백 #${videoId}에 대한 상세 설명입니다. 개선할 점이나 궁금한 점을 댓글로 남겨주세요.`,
+      uploadDate: `2023-10-2${videoId}`,
+      comments: comments,
+    };
+  },
+  addComment: async (videoId: string, commentText: string) => {
+    // Simulate adding a comment
+    console.log(`Adding comment to video ${videoId}: ${commentText}`);
+    return { success: true };
+  },
+  uploadVideoFeedback: async (payload: { title: string; description: string; videoFile: File }) => {
+    // Simulate video upload and saving metadata
+    console.log("Mock: Uploading video feedback", payload);
+    const newId = (Math.random() * 1000).toFixed(0);
+    const newFeedback = {
+      id: newId,
+      title: payload.title,
+      videoUrl: URL.createObjectURL(payload.videoFile), // Use a blob URL for mock preview
+      uploadDate: new Date().toISOString().split('T')[0],
+      commentsCount: 0,
+    };
+    // In a real app, you would save this to a backend and get a real URL
+    return newFeedback;
+  },
+};
+
+export const TeamsService = {
+  // 일반 텍스트/JSON 업로드용 (기본)
+  create: async (payload: any) =>
+    apiRequest({
+      method: "POST",
+      path: "/api/teams",
+      body: payload,
+    }),
+
+  // ✅ 이미지 파일(FormData) 업로드용
+  createWithFile: async (formData: FormData) => {
+    const token = localStorage.getItem("token");
+    const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/teams`, {
+      method: "POST",
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      body: formData, // FormData는 자동으로 Content-Type이 multipart/form-data로 설정됨
+    });
+
+    if (!res.ok) {
+      const message = (await res.text()) || "팀 생성 실패";
+      throw new ApiError(message, res.status);
+    }
+
+    // JSON이든 텍스트든 알아서 반환
+    const contentType = res.headers.get("content-type") || "";
+    if (contentType.includes("application/json")) {
+      return await res.json();
+    } else if (contentType.includes("text/plain")) {
+      return await res.text();
+    }
+    return undefined;
+  },
+
+  // 팀 목록 조회
+  list: async () => apiRequest({ method: "GET", path: "/api/teams" }),
+
+  // 팀 상세 조회
+  detail: async (teamId: string) =>
+    apiRequest({ method: "GET", path: `/api/teams/${teamId}` }),
+
+  // 팀 정보 수정
+  update: async (teamId: string, payload: any) =>
+    apiRequest({ method: "PUT", path: `/api/teams/${teamId}`, body: payload }),
 };

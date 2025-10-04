@@ -9,6 +9,7 @@ import CreateMatchPage from "../pages/CreateMatchPage";
 import MatchesListPage from "../pages/matches/MatchesListPage";
 import MatchDetailPage from "../pages/matches/MatchDetailPage";
 import RecommendationsPlayersPage from "../pages/recommendations/RecommendationsPlayersPage";
+import RecommendedPlayerDetailPage from "../pages/recommendations/RecommendedPlayerDetailPage";
 import UserProfilePage from "../pages/profiles/UserProfilePage";
 import EditMyProfilePage from "../pages/profiles/EditMyProfilePage";
 import TeamProfilePage from "../pages/profiles/TeamProfilePage";
@@ -19,6 +20,11 @@ import ChatRoomPage from "../pages/chat/ChatRoomPage";
 import FeedbackPage from "../pages/reviews/FeedbackPage";
 import UserReviewsPage from "../pages/reviews/UserReviewsPage";
 import TeamReviewsPage from "../pages/reviews/TeamReviewsPage";
+import CreateTeamProfilePage from "../pages/profiles/CreateTeamProfilePage";
+import GeneralFeedbackPage from "../pages/reviews/GeneralFeedbackPage"; // Renamed import
+import VideoFeedbackListPage from "../pages/reviews/VideoFeedbackListPage";
+import VideoFeedbackDetailPage from "../pages/reviews/VideoFeedbackDetailPage";
+import VideoFeedbackUploadPage from "../pages/reviews/VideoFeedbackUploadPage";
 import HeaderLogo from "./HeaderLogo";
 
 export default function Root() {
@@ -61,6 +67,15 @@ export default function Root() {
             </>
           }
         />
+        <Route
+          path="/recommendations/players/:playerIndex"
+          element={
+            <>
+              <HeaderLogo />
+              <RecommendedPlayerDetailPage />
+            </>
+          }
+        />
         {/* Profiles */}
         <Route
           path="/profiles/users/:userId"
@@ -99,6 +114,15 @@ export default function Root() {
           }
         />
         <Route
+          path="/profiles/teams/create"
+          element={
+            <>
+              <HeaderLogo />
+              <CreateTeamProfilePage />
+            </>
+          }
+        />
+        <Route
           path="/profiles/facilities/:facilityId"
           element={
             <>
@@ -132,7 +156,34 @@ export default function Root() {
           element={
             <>
               <HeaderLogo />
-              <FeedbackPage />
+              <GeneralFeedbackPage />
+            </>
+          }
+        />
+        <Route
+          path="/feedback/videos"
+          element={
+            <>
+              <HeaderLogo />
+              <VideoFeedbackListPage />
+            </>
+          }
+        />
+        <Route
+          path="/feedback/videos/:videoId"
+          element={
+            <>
+              <HeaderLogo />
+              <VideoFeedbackDetailPage />
+            </>
+          }
+        />
+        <Route
+          path="/feedback/videos/upload"
+          element={
+            <>
+              <HeaderLogo />
+              <VideoFeedbackUploadPage />
             </>
           }
         />

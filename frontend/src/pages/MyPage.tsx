@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { AuthService, ApiError } from "../services/api";
 import "./MyPage.css";
 import logoImg from "../logo.png";
 
 export default function MyPage() {
+  const navigate = useNavigate();
   const [name, setName] = useState<string>("");
   const [birthYear, setBirthYear] = useState<string>(""); // age 대신 birthYear 상태 사용
   const [gender, setGender] = useState<string>("");
@@ -12,13 +13,16 @@ export default function MyPage() {
   const [playStyles, setPlayStyles] = useState<string[]>([]);
   const [skills, setSkills] = useState<string[]>([]);
   const [area, setArea] = useState<string>("");
+  const [teamId, setTeamId] = useState<string | null>(null);
+  const [teamLogoUrl, setTeamLogoUrl] = useState<string | null>(null);
 
   const currentAge = birthYear ? new Date().getFullYear() - Number(birthYear) + 1 : null; // 만 나이 계산
 
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const profile = await AuthService.me();
+        // Assuming AuthService.me() now returns team info if available
+        const profile = await AuthService.me() as any;
 
         if (profile.name) setName(profile.name);
         if (profile.age) setBirthYear(profile.age); // profile.age를 birthYear로 사용
@@ -27,6 +31,16 @@ export default function MyPage() {
         if (Array.isArray(profile.playStyles)) setPlayStyles(profile.playStyles);
         if (Array.isArray(profile.skills)) setSkills(profile.skills);
         if (profile.area) setArea(profile.area);
+        
+        // Set team info if available
+        if (profile.team && profile.team.id) {
+          setTeamId(profile.team.id);
+          setTeamLogoUrl(profile.team.logoUrl || null);
+        } else {
+          setTeamId(null);
+          setTeamLogoUrl(null);
+        }
+
       } catch (error: any) {
         console.error("내 프로필 조회 실패:", error);
         alert("프로필 조회 실패: " + (error.message || "알 수 없는 오류"));
@@ -47,9 +61,9 @@ export default function MyPage() {
       <header className="mypage-header">
         <div className="profile-left">
           <div className="user-name">{name || "이름 없음"}</div>
-          <div className="stars" aria-label="평점">
+          {/* <div className="stars" aria-label="평점">
             <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
-          </div>
+          </div> */}
           <div className="tags-row">
             {positions.length > 0 ? (
               positions.map(p => <span key={p} className="tag">{p}</span>)
@@ -64,8 +78,23 @@ export default function MyPage() {
           </div>
         </div>
         <div className="profile-right">
-          <div className="avatar" aria-label="프로필 이미지" />
-          <button className="team-btn">팀 등록하기</button>
+          <div className="avatar" aria-label="프로필 이미지">
+            {/* {teamLogoUrl ? (
+              <img src={teamLogoUrl} alt="Team Logo" style={{ width: "100%", height: "100%", borderRadius: "50%", objectFit: "cover" }} />
+            ) : (
+              // You can keep a placeholder or user avatar here if no team logo
+              <img src={logoImg} alt="User Avatar" style={{ width: "100%", height: "100%", borderRadius: "50%", objectFit: "cover" }} />
+            )} */}
+          </div>
+          {teamId ? (
+            <button className="team-btn" onClick={() => navigate(`/profiles/teams/${teamId}/edit`)}>
+              팀 수정
+            </button>
+          ) : (
+            <button className="team-btn" onClick={() => navigate("/profiles/teams/create")}>
+              팀 등록하기
+            </button>
+          )}
         </div>
       </header>
 

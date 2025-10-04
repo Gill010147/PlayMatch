@@ -135,7 +135,7 @@ const NavBar: React.FC = () => {
           <div>채팅</div>
           <div className="nav-menu-eng">Chat</div>
         </button>
-        <button onClick={() => navigate('/feedback')} className="nav-link nav-menu-item" style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+        <button onClick={() => navigate('/feedback/videos')} className="nav-link nav-menu-item" style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
           <img src={feedback} alt="피드백 아이콘" className="nav-menu-icon" />
           <div>피드백</div>
           <div className="nav-menu-eng">Feedback</div>
