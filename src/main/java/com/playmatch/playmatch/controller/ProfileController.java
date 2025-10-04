@@ -17,6 +17,13 @@ public class ProfileController {
 
     private final ProfileService profileService;
 
+    @GetMapping("/me")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<ProfileResponseDto> getMyProfile(Principal principal) {
+        ProfileResponseDto profile = profileService.getMyProfile(principal.getName());
+        return ResponseEntity.ok(profile);
+    }
+
     @PutMapping("/me")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<String> updateMyProfile(Principal principal, @RequestBody ProfileRequestDto requestDto) {

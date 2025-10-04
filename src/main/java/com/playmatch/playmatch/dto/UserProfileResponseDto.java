@@ -4,6 +4,8 @@ import com.playmatch.playmatch.domain.User;
 import com.playmatch.playmatch.domain.UserRoleEnum;
 import lombok.Getter;
 
+import java.util.List;
+
 @Getter
 public class UserProfileResponseDto {
     private final String email;
@@ -11,8 +13,9 @@ public class UserProfileResponseDto {
     private final String area;
     private final String age;
     private final String gender;
-    private final String playStyle;
-    private final String position;
+    private final List<String> playStyles;
+    private final List<String> positions;
+    private final List<String> skills;
     private final UserRoleEnum role;
 
     public UserProfileResponseDto(User user) {
@@ -21,8 +24,9 @@ public class UserProfileResponseDto {
         this.area = user.getArea();
         this.age = user.getAge();
         this.gender = user.getGender();
-        this.playStyle = user.getPlayStyle();
-        this.position = user.getPosition();
+        this.playStyles = user.getPlayStyles();
+        this.positions = user.getPositions();
+        this.skills = user.getSkills();
         this.role = user.getRole();
     }
 }

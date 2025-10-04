@@ -25,12 +25,22 @@ function buildQueryString(query?: ApiRequestOptions["query"]): string {
   return q ? `?${q}` : "";
 }
 
+export class ApiError extends Error {
+  status: number;
+  constructor(message: string, status: number) {
+    super(message);
+    this.name = "ApiError";
+    this.status = status;
+  }
+}
+
 export async function apiRequest<TResponse = unknown>(options: ApiRequestOptions): Promise<TResponse> {
   const { method = "GET", path, query, body, headers } = options;
   const url = `${baseUrl}${path}${buildQueryString(query)}`;
 
   // NOTE: Auth header placeholder. Replace with real token retrieval when integrated.
   const token = localStorage.getItem("token");
+  console.log("API Request Token:", token);
   const defaultHeaders: Record<string, string> = {
     "Content-Type": "application/json",
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -44,12 +54,24 @@ export async function apiRequest<TResponse = unknown>(options: ApiRequestOptions
   });
 
   if (!res.ok) {
-    let message: string | undefined;
-    try {
-      const data = await res.json();
-      message = (data && (data.message || data.error)) as string | undefined;
-    } catch {}
-    throw new Error(message || `Request failed: ${res.status}`);
+    const contentType = res.headers.get("content-type") || "";
+    let errorMessage: string = `Request failed: ${res.status} ${res.statusText}`;
+
+    if (contentType.includes("application/json")) {
+      try {
+        const errorData = await res.json();
+        errorMessage = errorData.message || errorData.error || errorMessage;
+      } catch (e) {
+        // JSON 파싱 실패 시 기본 메시지 사용
+      }
+    } else if (contentType.includes("text/plain")) {
+      try {
+        errorMessage = await res.text();
+      } catch (e) {
+        // 텍스트 파싱 실패 시 기본 메시지 사용
+      }
+    }
+    throw new ApiError(errorMessage, res.status);
   }
 
   const contentType = res.headers.get("content-type") || "";

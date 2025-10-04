@@ -62,13 +62,11 @@ public class SecurityConfig {
         http.authorizeHttpRequests((authorizeHttprequests) ->
                 authorizeHttprequests
                         .requestMatchers("/api/auth/**").permitAll() // 인증 관련 경로는 모두 허용
+                        .requestMatchers(HttpMethod.GET, "/api/matches").permitAll() // 경기 목록 조회는 인증 없이 허용
                         .requestMatchers("/ws-stomp/**").permitAll() // WebSocket 연결 경로 허용
                         .requestMatchers("/chat.html").permitAll() // 채팅 테스트 페이지 허용
                         .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
-                        .requestMatchers("/api/**").permitAll() // 테스트를 위해 임시로 모든 api 요청 허용
-                        .requestMatchers("/api/users/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/matches/**").permitAll()
-                        .anyRequest().authenticated()
+                        .anyRequest().authenticated() // 그 외 모든 요청은 인증 필요
         );
 
         http.addFilterBefore(new JwtAuthorizationFilter(jwtUtil, userDetailsService, redisTemplate), UsernamePasswordAuthenticationFilter.class);

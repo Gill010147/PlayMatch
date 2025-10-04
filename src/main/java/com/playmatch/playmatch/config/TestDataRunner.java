@@ -1,6 +1,5 @@
 package com.playmatch.playmatch.config;
 
-import com.playmatch.playmatch.domain.UserRoleEnum;
 import com.playmatch.playmatch.dto.SignUpRequestDto;
 import com.playmatch.playmatch.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +24,6 @@ public class TestDataRunner {
                 user1Dto.setEmail("user1@test.com");
                 user1Dto.setPassword("password");
                 user1Dto.setName("유저1");
-                user1Dto.setRole(UserRoleEnum.USER);
                 userService.signUp(user1Dto);
             } catch (IllegalArgumentException e) {
                 // 이미 사용자가 존재하면 무시
@@ -37,7 +35,6 @@ public class TestDataRunner {
                 user2Dto.setEmail("user2@test.com");
                 user2Dto.setPassword("password");
                 user2Dto.setName("유저2");
-                user2Dto.setRole(UserRoleEnum.USER);
                 userService.signUp(user2Dto);
             } catch (IllegalArgumentException e) {
                 // 이미 사용자가 존재하면 무시

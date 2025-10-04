@@ -43,11 +43,13 @@ public class UserService {
                 .email(email)
                 .password(password)
                 .name(requestDto.getName())
-                .area(requestDto.getArea())
+                .area(requestDto.getFullAddress()) // fullAddress를 area에 매핑
+                .phone(requestDto.getPhone()) // phone 필드 추가
                 .age(requestDto.getAge())
                 .gender(requestDto.getGender())
-                .playStyle(requestDto.getPlayStyle())
-                .position(requestDto.getPosition())
+                .playStyles(requestDto.getPlayStyles()) // playStyles 필드 추가
+                .positions(requestDto.getPositions()) // positions 필드 추가
+                .skills(requestDto.getSkills()) // skills 필드 추가
                 .role(UserRoleEnum.USER) // 기본 권한을 USER로 설정
                 .build();
 

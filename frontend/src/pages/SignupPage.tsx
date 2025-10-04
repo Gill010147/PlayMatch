@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { AuthService } from "../services/api"; // axios 대신 AuthService 임포트
+import { AuthService, ApiError } from "../services/api"; // ApiError 임포트 추가
 import "./SignupPage.css";
 import logoImg from "../logo.png";
 
@@ -32,7 +32,6 @@ export default function SignupPage() {
   const [day, setDay] = useState("");
   const [gender, setGender] = useState<Gender>("");
   const [phone, setPhone] = useState("");
-  const [verification, setVerification] = useState("");
 
   const [positions, setPositions] = useState<string[]>([]);
   const [playStyles, setPlayStyles] = useState<string[]>([]);
@@ -92,21 +91,21 @@ export default function SignupPage() {
         email,
         password,
         name,
-        birth: `${year}-${month}-${day}`,
+        age: year, // age 필드 추가 (year 사용)
         gender,
-        phone,
+        phone, // phone 필드 추가
         positions,
         playStyles,
         skills,
-        region: { city, district, neighborhood, fullAddress },
+        fullAddress, // fullAddress 필드 추가
       });
 
       alert("회원가입 성공!");
-      console.log("회원가입 응답:", response.data);
+      console.log("회원가입 응답:", response);
       navigate("/"); // 성공 시 메인으로 이동
     } catch (error: any) {
       console.error(error);
-      alert("회원가입 실패: " + (error.response?.data?.message || "알 수 없는 오류"));
+      alert("회원가입 실패: " + (error.message || "알 수 없는 오류"));
     }
   };
 
@@ -188,11 +187,6 @@ export default function SignupPage() {
         <label className="field">
           <span>휴대폰 번호</span>
           <input type="tel" placeholder="휴대폰 번호를 입력하세요" value={phone} onChange={e => setPhone(e.target.value)} />
-        </label>
-
-        <label className="field">
-          <span>인증 번호</span>
-          <input type="text" placeholder="인증 번호를 입력하세요" value={verification} onChange={e => setVerification(e.target.value)} />
         </label>
 
         <h3 className="section-title">기본 프로필</h3>

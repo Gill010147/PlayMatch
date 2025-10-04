@@ -38,6 +38,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
         String tokenValue = jwtUtil.getJwtFromHeader(req);
 
         if (StringUtils.hasText(tokenValue)) {
+            log.info("Token value from header: {}", tokenValue);
             // Redis에 해당 토큰이 있는지 확인 (로그아웃된 토큰인지 검사)
             String redisKey = "blacklist:" + tokenValue;
             if (Boolean.TRUE.equals(redisTemplate.hasKey(redisKey))) {

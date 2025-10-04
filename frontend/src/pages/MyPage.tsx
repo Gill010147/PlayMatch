@@ -1,32 +1,35 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import axios from "axios";
+import { AuthService, ApiError } from "../services/api";
 import "./MyPage.css";
 import logoImg from "../logo.png";
 
 export default function MyPage() {
   const [name, setName] = useState<string>("");
+  const [birthYear, setBirthYear] = useState<string>(""); // age 대신 birthYear 상태 사용
+  const [gender, setGender] = useState<string>("");
   const [positions, setPositions] = useState<string[]>([]);
   const [playStyles, setPlayStyles] = useState<string[]>([]);
   const [skills, setSkills] = useState<string[]>([]);
-  const [region, setRegion] = useState<{ city?: string; district?: string } | null>(null);
+  const [area, setArea] = useState<string>("");
+
+  const currentAge = birthYear ? new Date().getFullYear() - Number(birthYear) + 1 : null; // 만 나이 계산
 
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const token = localStorage.getItem("token"); // 로그인 시 저장했던 토큰
-        const response = await axios.get("/api/users/me", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const profile = await AuthService.me();
 
-        const data = response.data;
-        if (data.name) setName(data.name);
-        if (Array.isArray(data.positions)) setPositions(data.positions);
-        if (Array.isArray(data.playStyles)) setPlayStyles(data.playStyles);
-        if (Array.isArray(data.skills)) setSkills(data.skills);
-        if (data.region) setRegion({ city: data.region.city, district: data.region.district });
-      } catch (error) {
+        if (profile.name) setName(profile.name);
+        if (profile.age) setBirthYear(profile.age); // profile.age를 birthYear로 사용
+        if (profile.gender) setGender(profile.gender);
+        if (Array.isArray(profile.positions)) setPositions(profile.positions);
+        if (Array.isArray(profile.playStyles)) setPlayStyles(profile.playStyles);
+        if (Array.isArray(profile.skills)) setSkills(profile.skills);
+        if (profile.area) setArea(profile.area);
+      } catch (error: any) {
         console.error("내 프로필 조회 실패:", error);
+        alert("프로필 조회 실패: " + (error.message || "알 수 없는 오류"));
       }
     };
 
@@ -34,12 +37,13 @@ export default function MyPage() {
   }, []);
 
   return (
-    <div className="mypage-wrap">
+    <div className="mypage-wrap" style={{ backgroundColor: "#f9f9f9", minHeight: "100vh" }}> {/* 배경색 추가 */}
       <div className="mypage-top">
-        <Link to="/" aria-label="메인으로 이동">
+        <Link to="/">
           <img src={logoImg} alt="Play Match Logo" className="mypage-logo" />
         </Link>
       </div>
+      <h2 style={{ textAlign: "center", margin: "24px 0", color: "#333" }}>내 프로필</h2> {/* 제목 추가 */}
       <header className="mypage-header">
         <div className="profile-left">
           <div className="user-name">{name || "이름 없음"}</div>
@@ -54,8 +58,9 @@ export default function MyPage() {
             )}
           </div>
           <div className="meta-row">
-            <span className="pill">{region ? `${region.city || ""} ${region.district || ""}`.trim() : "지역 미설정"}</span>
-            <span className="pill">20대</span>
+            <span className="pill">{area || "지역 미설정"}</span>
+            <span className="pill">{currentAge ? `${currentAge}세` : "나이 미설정"}</span> {/* 계산된 나이 표시 */}
+            <span className="pill">{gender || "성별 미설정"}</span>
           </div>
         </div>
         <div className="profile-right">
@@ -92,25 +97,25 @@ export default function MyPage() {
         </div>
       </section>
 
-		{/* 하단 정보 수정 버튼 */}
-		<div style={{ marginTop: 24, padding: "0 16px", display: "flex", justifyContent: "flex-end" }}>
-			<Link to="/profiles/users/me/edit">
-				<button
-					className="edit-profile-btn"
-					style={{
-						padding: "10px 16px",
-						backgroundColor: "rgba(70, 55, 238, 1)",
-						color: "#fff",
-						border: "none",
-						borderRadius: 8,
-						cursor: "pointer",
-						fontWeight: 600,
-					}}
-				>
-					정보 수정
-				</button>
-			</Link>
-		</div>
+{/* 하단 정보 수정 버튼 */}
+<div style={{ marginTop: 24, padding: "0 16px", display: "flex", justifyContent: "flex-end" }}>
+<Link to="/profiles/users/me/edit">
+<button
+className="edit-profile-btn"
+style={{
+padding: "10px 16px",
+backgroundColor: "rgba(70, 55, 238, 1)",
+color: "#fff",
+border: "none",
+borderRadius: 8,
+cursor: "pointer",
+fontWeight: 600,
+}}
+>
+정보 수정
+</button>
+</Link>
+</div>
     </div>
   );
 }

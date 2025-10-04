@@ -15,12 +15,6 @@ function App() {
 
   useEffect(() => {
     const init = async () => {
-      const alreadyCleared = localStorage.getItem("playmatch.clearedOnce");
-      if (!alreadyCleared) {
-        MatchesService.clearAll();
-        localStorage.setItem("playmatch.clearedOnce", "1");
-      }
-
       try {
         const list = await MatchesService.list();
         // ✅ list가 undefined/null이어도 안전하게 처리

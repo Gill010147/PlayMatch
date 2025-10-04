@@ -51,14 +51,19 @@ public class JwtUtil {
 
     public String getJwtFromHeader(HttpServletRequest request) {
         String bearerToken = request.getHeader(AUTHORIZATION_HEADER);
+        log.info("getJwtFromHeader - Raw bearerToken: {}", bearerToken);
         return resolveToken(bearerToken);
     }
 
     // "Bearer " 접두사 제거 메서드
     public String resolveToken(String bearerToken) {
+        log.info("resolveToken - Input bearerToken: {}", bearerToken);
         if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(BEARER_PREFIX)) {
-            return bearerToken.substring(7);
+            String resolved = bearerToken.substring(7);
+            log.info("resolveToken - Resolved token: {}", resolved);
+            return resolved;
         }
+        log.info("resolveToken - Token not resolved, returning null.");
         return null;
     }
 

@@ -3,6 +3,8 @@ package com.playmatch.playmatch.dto;
 import com.playmatch.playmatch.domain.User;
 import lombok.Getter;
 
+import java.util.List;
+
 @Getter
 public class ProfileResponseDto {
     private final String email;
@@ -10,8 +12,9 @@ public class ProfileResponseDto {
     private final String area;
     private final String age;
     private final String gender;
-    private final String playStyle;
-    private final String position;
+    private final List<String> playStyles;
+    private final List<String> positions;
+    private final List<String> skills;
 
     public ProfileResponseDto(User user) {
         this.email = user.getEmail();
@@ -19,7 +22,8 @@ public class ProfileResponseDto {
         this.area = user.getArea();
         this.age = user.getAge();
         this.gender = user.getGender();
-        this.playStyle = user.getPlayStyle();
-        this.position = user.getPosition();
+        this.playStyles = user.getPlayStyles();
+        this.positions = user.getPositions();
+        this.skills = user.getSkills();
     }
 }

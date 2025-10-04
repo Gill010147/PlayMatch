@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { AuthService } from "../services/api";
+import { AuthService, ApiError } from "../services/api";
 import "./LoginPage.css";
 import logoImg from "../logo.png";
 import kakaoLogo from "./kakaologo.jpeg";
@@ -25,7 +25,7 @@ export default function LoginPage() {
       }
 
       // 로그인 성공 → 토큰 저장
-      localStorage.setItem("token", token);
+      localStorage.setItem("token", token.substring(7)); // 'Bearer ' 접두사 제거 후 저장
 
       alert("로그인 성공!");
       // 전역 UI 업데이트 트리거

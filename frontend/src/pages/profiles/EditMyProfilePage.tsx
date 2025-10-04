@@ -1,11 +1,12 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ProfilesService } from "../../services/api";
-import type { UserProfile } from "../../types/domain";
+import { ProfilesService, AuthService, ApiError } from "../../services/api";
+import type { UserProfileResponseDto, ProfileRequestDto } from "../../types/domain";
 
 export default function EditMyProfilePage() {
   const navigate = useNavigate();
-  const [form, setForm] = useState<Partial<UserProfile> & { age?: number }>({});
+  const [form, setForm] = useState<ProfileRequestDto>({}); // ProfileRequestDto 타입으로 변경
+  const [initialProfile, setInitialProfile] = useState<UserProfileResponseDto | null>(null); // 초기 프로필 저장
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [birthYear, setBirthYear] = useState<string>("");
@@ -30,31 +31,46 @@ export default function EditMyProfilePage() {
     return Array.from({ length: last }, (_, i) => i + 1);
   }, [birthYear, birthMonth]);
 
-  // 초기값 세팅 (localStorage → 추후 서버 값으로 교체 가능)
+  // 초기값 세팅 (서버에서 가져옴)
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem("userProfile");
-      if (raw) setForm(JSON.parse(raw));
-    } catch {}
+    const fetchInitialProfile = async () => {
+      try {
+        const profile = await AuthService.me();
+        setInitialProfile(profile);
+        setForm({
+          name: profile.name,
+          area: profile.area,
+          age: profile.age,
+          gender: profile.gender,
+          playStyles: profile.playStyles,
+          positions: profile.positions,
+          skills: profile.skills,
+          phone: profile.phone,
+        });
+
+        // 생년월일 역계산 (age가 YYYY-MM-DD 형식이라고 가정)
+        if (profile.age) {
+          const [year, month, day] = profile.age.split("-");
+          setBirthYear(year);
+          setBirthMonth(month);
+          setBirthDay(day);
+        }
+      } catch (err) {
+        console.error("초기 프로필 로드 실패:", err);
+        setError("프로필을 불러오지 못했습니다.");
+      }
+    };
+    fetchInitialProfile();
   }, []);
 
   // 나이 계산
   useEffect(() => {
-    if (birthYear && birthMonth && birthDay) {
-      const by = Number(birthYear);
-      const bm = Number(birthMonth);
-      const bd = Number(birthDay);
-      const today = new Date();
-      let age = today.getFullYear() - by;
-      if (
-        today.getMonth() + 1 < bm ||
-        (today.getMonth() + 1 === bm && today.getDate() < bd)
-      ) {
-        age -= 1;
-      }
-      setForm((f) => ({ ...f, age }));
+    if (birthYear) {
+      setForm((f) => ({ ...f, age: birthYear })); // form.age에 생년월일 중 '년도'를 저장
     }
-  }, [birthYear, birthMonth, birthDay]);
+  }, [birthYear]);
+
+  const currentAge = birthYear ? new Date().getFullYear() - Number(birthYear) + 1 : null; // 만 나이 계산
 
   const toggleChip = (key: "positions" | "playStyles" | "skills", value: string) => {
     setForm((f) => {
@@ -91,12 +107,13 @@ export default function EditMyProfilePage() {
     setSaving(true);
     setError(null);
     try {
-      localStorage.setItem("userProfile", JSON.stringify(form)); // 프론트에서도 보관
-      await ProfilesService.updateMe(form); // 서버 업데이트
+      // ProfilesService.updateMe는 ProfileRequestDto를 받음
+      await ProfilesService.updateMe(form as ProfileRequestDto); 
       alert("저장 완료");
       navigate("/mypage");
     } catch (err: any) {
-      setError(err?.message || "저장 실패");
+      console.error("프로필 저장 실패:", err);
+      setError(err.message || "저장 실패");
     } finally {
       setSaving(false);
     }
@@ -123,19 +140,24 @@ export default function EditMyProfilePage() {
             <span>지역</span>
             <button type="button" onClick={openAddressSearch}>주소 검색</button>
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-            <input
-              placeholder="도시"
-              value={form.region?.city || ""}
-              onChange={(e) => setForm((f) => ({ ...f, region: { ...(f.region || {}), city: e.target.value } }))}
-            />
-            <input
-              placeholder="구/군"
-              value={form.region?.district || ""}
-              onChange={(e) => setForm((f) => ({ ...f, region: { ...(f.region || {}), district: e.target.value } }))}
-            />
-          </div>
+          <input
+            placeholder="주소"
+            value={form.area || ""}
+            onChange={(e) => setForm((f) => ({ ...f, area: e.target.value }))}
+            style={{ padding: 10, borderRadius: 8, border: "1px solid #ddd" }}
+          />
         </div>
+
+        {/* 휴대폰 번호 */}
+        <label style={{ display: "grid", gap: 6 }}>
+          <span>휴대폰 번호</span>
+          <input
+            value={form.phone || ""}
+            onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
+            placeholder="휴대폰 번호를 입력하세요"
+            style={{ padding: 10, borderRadius: 8, border: "1px solid #ddd" }}
+          />
+        </label>
 
         {/* 생년월일 */}
         <div style={{ display: "grid", gap: 8 }}>
@@ -157,6 +179,15 @@ export default function EditMyProfilePage() {
           <div>나이: {form.age ? `${form.age}세` : "미설정"}</div>
         </div>
 
+        {/* 성별 */}
+        <div style={{ display: "grid", gap: 8 }}>
+          <span>성별</span>
+          <div style={{ display: "flex", gap: 8 }}>
+            <button type="button" onClick={() => setForm((f) => ({ ...f, gender: "male" }))} style={{ padding: "8px 16px", borderRadius: 8, border: `1px solid ${form.gender === "male" ? "blue" : "#ddd"}` }}>남자</button>
+            <button type="button" onClick={() => setForm((f) => ({ ...f, gender: "female" }))} style={{ padding: "8px 16px", borderRadius: 8, border: `1px solid ${form.gender === "female" ? "blue" : "#ddd"}` }}>여자</button>
+          </div>
+        </div>
+
         {/* 포지션 */}
         <div>
           <span>포지션</span>
@@ -164,7 +195,7 @@ export default function EditMyProfilePage() {
             {POSITION_OPTIONS.map((opt) => {
               const selected = (form.positions || []).includes(opt);
               return (
-                <button key={opt} type="button" onClick={() => toggleChip("positions", opt)}>
+                <button key={opt} type="button" onClick={() => toggleChip("positions", opt)} style={{ padding: "8px 16px", borderRadius: 8, border: `1px solid ${selected ? "blue" : "#ddd"}` }}>
                   {selected ? `✅ ${opt}` : opt}
                 </button>
               );
@@ -179,7 +210,7 @@ export default function EditMyProfilePage() {
             {PLAYSTYLE_OPTIONS.map((opt) => {
               const selected = (form.playStyles || []).includes(opt);
               return (
-                <button key={opt} type="button" onClick={() => toggleChip("playStyles", opt)}>
+                <button key={opt} type="button" onClick={() => toggleChip("playStyles", opt)} style={{ padding: "8px 16px", borderRadius: 8, border: `1px solid ${selected ? "blue" : "#ddd"}` }}>
                   {selected ? `✅ ${opt}` : opt}
                 </button>
               );
@@ -194,7 +225,7 @@ export default function EditMyProfilePage() {
             {SKILL_OPTIONS.map((opt) => {
               const selected = (form.skills || []).includes(opt);
               return (
-                <button key={opt} type="button" onClick={() => toggleChip("skills", opt)}>
+                <button key={opt} type="button" onClick={() => toggleChip("skills", opt)} style={{ padding: "8px 16px", borderRadius: 8, border: `1px solid ${selected ? "blue" : "#ddd"}` }}>
                   {selected ? `✅ ${opt}` : opt}
                 </button>
               );

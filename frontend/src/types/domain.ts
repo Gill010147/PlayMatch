@@ -25,18 +25,15 @@ export interface FacilityProfile {
   address: string;
 }
 
-export interface MatchSummary {
-  id: string;
-  time: string;
-  location: string;
-  type: string;
-  teams: string;
-  status: "open" | "closed";
-}
-
-export interface MatchDetail extends MatchSummary {
-  description?: string;
-  hostTeamId?: string;
+export interface MatchResponseDto {
+  id: number;
+  title: string;
+  hostTeamName: string;
+  matchDate: string; // LocalDateTime will be string in TS
+  locationName: string;
+  status: "PENDING" | "CONFIRMED" | "COMPLETED" | "CANCELLED"; // Assuming these are the enum values
+  memberCount: number;
+  maxMemberCount: number;
 }
 
 export interface ChatRoom {
@@ -60,6 +57,17 @@ export interface Review {
   rating: number;
   comment?: string;
   createdAt: string;
+}
+
+export interface ProfileRequestDto {
+  name?: string;
+  area?: string;
+  age?: string;
+  gender?: string;
+  playStyles?: string[];
+  positions?: string[];
+  skills?: string[];
+  phone?: string;
 }
 
 

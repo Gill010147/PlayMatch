@@ -32,7 +32,7 @@ public class AuthController {
     public ResponseEntity<String> login(@RequestBody LoginRequestDto requestDto, HttpServletResponse response) {
         String token = userService.logIn(requestDto);
         response.addHeader(JwtUtil.AUTHORIZATION_HEADER, token);
-        return ResponseEntity.ok("로그인 성공");
+        return ResponseEntity.ok(token); // 토큰 문자열을 직접 반환
     }
 
     @PostMapping("/logout")
