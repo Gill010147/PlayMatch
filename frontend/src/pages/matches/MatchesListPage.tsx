@@ -1,7 +1,19 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { MatchesService } from "../../services/api";
-import type { MatchResponseDto } from "../../types/domain"; // MatchResponseDto로 변경
+import type { MatchResponseDto } from "../../types/domain";
+import RecommendedMatchList from "../../components/recommendmatch";
+import KakaoMap from "../../components/kakaomap";
+
+// MatchResponseDto를 KakaoMap 및 RecommendedMatchList에서 사용하는 Match 인터페이스에 맞게 매핑
+interface DisplayMatch {
+  id: string;
+  time: string;
+  location: string;
+  type: string;
+  teams: string; // hostTeamName을 사용
+  status: "open" | "closed"; // MatchStatus를 "open" 또는 "closed"로 매핑
+}
 
 // 날짜/시간 포맷팅 유틸리티 함수
 const formatDateTime = (dateTimeString: string) => {
@@ -17,7 +29,7 @@ const formatDateTime = (dateTimeString: string) => {
 export default function MatchesListPage() {
   const navigate = useNavigate();
   const [filters, setFilters] = useState<{ region?: string; date?: string; time?: string }>({});
-  const [items, setItems] = useState<MatchResponseDto[]>([]); // MatchResponseDto[]로 변경
+  const [items, setItems] = useState<MatchResponseDto[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -29,7 +41,6 @@ export default function MatchesListPage() {
     MatchesService.list(filters)
       .then((list: any) => {
         if (!mounted) return;
-        // 백엔드에서 List<MatchResponseDto>를 반환하므로, 그대로 사용
         setItems(Array.isArray(list) ? list : []);
       })
       .catch((err) => {
@@ -45,9 +56,22 @@ export default function MatchesListPage() {
     };
   }, [filters]);
 
+  // MatchesResponseDto를 DisplayMatch로 변환
+  const displayMatches: DisplayMatch[] = items.map(item => ({
+    id: String(item.id),
+    time: formatDateTime(item.matchDate),
+    location: item.locationName,
+    type: item.matchType,
+    teams: item.hostTeamName || "", // hostTeamName이 없을 경우 빈 문자열
+    status: item.status === "RECRUITING" ? "open" : "closed", // MatchStatus 매핑
+  }));
+
   return (
     <div style={{ maxWidth: 960, margin: "24px auto", padding: "0 16px" }}>
       <h2>경기 목록</h2>
+      
+      
+
       <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, margin: "12px 0 20px" }}>
         <input placeholder="지역" value={filters.region || ""} onChange={(e) => setFilters((f) => ({ ...f, region: e.target.value }))} />
         <input type="date" value={filters.date || ""} onChange={(e) => setFilters((f) => ({ ...f, date: e.target.value }))} />

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-// import { VideoFeedbackService } from "../../services/api"; // Will be used for API call
+import { VideoFeedbackService } from "../../services/api"; // Will be used for API call
 
 export default function VideoFeedbackUploadPage() {
   const navigate = useNavigate();
@@ -39,12 +39,9 @@ export default function VideoFeedbackUploadPage() {
     setSaving(true);
     setError(null);
     try {
-      // Simulate video upload (replace with actual API call)
-      console.log("Uploading video feedback:", { title, description, videoFile: videoFile.name });
-      await new Promise(resolve => setTimeout(resolve, 1500));
-
+      await VideoFeedbackService.uploadVideoFeedback({ title, description, videoFile });
       alert("영상 피드백이 성공적으로 업로드되었습니다.");
-      navigate("/feedback/videos"); // Navigate back to the list page
+      navigate("/feedback/videos");
     } catch (err: any) {
       setError(err?.message || "영상 업로드 실패");
     } finally {
@@ -119,4 +116,5 @@ export default function VideoFeedbackUploadPage() {
     </div>
   );
 }
+
 

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-// Assuming a service for video feedbacks will be created
-// import { VideoFeedbackService } from "../../services/api";
+import { VideoFeedbackService } from "../../services/api";
 
 interface Comment {
   id: string;
@@ -25,25 +24,27 @@ export default function VideoFeedbackDetailPage() {
   const [videoFeedback, setVideoFeedback] = useState<VideoFeedbackDetail | null>(null);
   const [newCommentText, setNewCommentText] = useState("");
   const [savingComment, setSavingComment] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Mock data for a single video feedback (replace with API call)
   useEffect(() => {
-    if (videoId) {
-      // Simulate fetching data
-      const mockData: VideoFeedbackDetail = {
-        id: videoId,
-        title: `경기 영상 피드백 ${videoId}`,
-        videoUrl: videoId === "1" ? "https://www.w3schools.com/html/mov_bbb.mp4" : "https://www.w3schools.com/html/movie.mp4",
-        description: `이 영상은 경기 영상 피드백 #${videoId}에 대한 상세 설명입니다. 개선할 점이나 궁금한 점을 댓글로 남겨주세요.`,
-        uploadDate: `2023-10-2${videoId}`,
-        comments: [
-          { id: "c1", author: "사용자 A", text: "정말 좋은 영상입니다!", timestamp: "2023-10-26 10:00" },
-          { id: "c2", author: "사용자 B", text: "이 부분에서 패스가 좋았어요.", timestamp: "2023-10-26 10:15" },
-        ],
-      };
-      setVideoFeedback(mockData);
-    }
+    const fetchVideoFeedbackDetail = async () => {
+      if (!videoId) return;
+      try {
+        setLoading(true);
+        const data = await VideoFeedbackService.detail(videoId);
+        if (data) {
+          setVideoFeedback(data);
+        } else {
+          setError("영상을 찾을 수 없습니다.");
+        }
+      } catch (err: any) {
+        setError(err?.message || "영상 상세 정보를 불러오는데 실패했습니다.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchVideoFeedbackDetail();
   }, [videoId]);
 
   const handleAddComment = async () => {
@@ -54,6 +55,7 @@ export default function VideoFeedbackDetailPage() {
 
     setSavingComment(true);
     try {
+      // TODO: Implement actual API call for adding comment
       const newComment: Comment = {
         id: Date.now().toString(),
         author: "현재 사용자 (가정)", // In a real app, this would be the logged-in user
@@ -61,8 +63,7 @@ export default function VideoFeedbackDetailPage() {
         timestamp: new Date().toLocaleString(),
       };
 
-      // Simulate API call to add comment
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise(resolve => setTimeout(resolve, 500)); // Simulate API call
 
       setVideoFeedback((prev) => {
         if (!prev) return null;
@@ -75,6 +76,14 @@ export default function VideoFeedbackDetailPage() {
       setSavingComment(false);
     }
   };
+
+  if (loading) {
+    return <p style={{ textAlign: "center", margin: "24px auto" }}>로딩 중...</p>;
+  }
+
+  if (error) {
+    return <p style={{ textAlign: "center", margin: "24px auto", color: "crimson" }}>오류: {error}</p>;
+  }
 
   if (!videoFeedback) {
     return <div style={{ textAlign: "center", padding: "24px" }}>영상을 찾을 수 없습니다.</div>;
@@ -138,4 +147,5 @@ export default function VideoFeedbackDetailPage() {
     </div>
   );
 }
+
 

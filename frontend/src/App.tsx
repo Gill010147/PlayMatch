@@ -5,29 +5,17 @@ import NavBar from "./components/NavBar";
 import KakaoMap from "./components/kakaomap";
 import Banner from "./components/Banner";
 import RecommendedMatchList from "./components/recommendmatch";
-import { MatchesService } from "./services/api";
+import { useMatches } from './contexts/MatchesContext';
 
 import "./App.css";
 
 function App() {
-  const [matches, setMatches] = useState<any[]>([]);
+  const { matches, fetchMatches } = useMatches();
   const navigate = useNavigate();
 
   useEffect(() => {
     console.log("VITE_API_BASE_URL:", import.meta.env.VITE_API_BASE_URL);
     console.log("VITE_USE_MOCKS:", import.meta.env.VITE_USE_MOCKS);
-    const init = async () => {
-      try {
-        const list = await MatchesService.list();
-        // ✅ list가 undefined/null이어도 안전하게 처리
-        setMatches(Array.isArray(list) ? list : []);
-      } catch (err) {
-        console.error("매치 목록 불러오기 실패:", err);
-        setMatches([]); // 실패 시에도 빈 배열 유지
-      }
-    };
-
-    init();
   }, []);
 
   // 새 팝업창 열기 함수 (현재 매치 데이터를 함께 전달)

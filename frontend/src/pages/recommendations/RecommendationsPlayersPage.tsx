@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { RecommendationsService } from "../../services/api";
 import { POSITIONS, PLAY_STYLES, PLAYER_SKILLS } from "../../constants/playerOptions"; 
 import { useNavigate } from "react-router-dom";
-// 위 세 개는 네가 만든 상수 배열 파일에서 export 해두면 깔끔함
+import "../SignupPage.css"; // SignupPage.css import
 
 export default function RecommendationsPlayersPage() {
   const [criteria, setCriteria] = useState<{
@@ -44,16 +44,16 @@ export default function RecommendationsPlayersPage() {
   };
 
   return (
-    <div style={{ maxWidth: 960, margin: "24px auto", padding: "0 16px" }}>
-      <h2>⚽ 원하는 선수 유형을 선택해주세요!</h2>
+    <div className="signup-container">
+      <h2 className="form-title">⚽ 원하는 선수 유형을 선택해주세요!</h2>
       <form
         onSubmit={handleSubmit}
-        style={{ display: "grid", gap: 24, marginTop: 16 }}
+        className="signup-form"
       >
         {/* 포지션 */}
-        <div>
-          <span style={{ fontWeight: "600" }}>포지션</span>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 8 }}>
+        <div className="field">
+          <span className="label">포지션</span>
+          <div className="field-group row gap grid-4">
             {POSITIONS.map((opt) => {
               const selected = criteria.position === opt;
               return (
@@ -61,13 +61,7 @@ export default function RecommendationsPlayersPage() {
                   key={opt}
                   type="button"
                   onClick={() => setCriteria((c) => ({ ...c, position: opt }))}
-                  style={{
-                    padding: "8px 16px",
-                    borderRadius: "8px",
-                    border: `1px solid ${selected ? "blue" : "#ccc"}`,
-                    backgroundColor: selected ? "#e0f7fa" : "#fff",
-                    cursor: "pointer",
-                  }}
+                  className={`chip ${selected ? "selected" : ""}`}
                 >
                   {opt}
                 </button>
@@ -77,9 +71,9 @@ export default function RecommendationsPlayersPage() {
         </div>
 
         {/* 플레이 스타일 */}
-        <div>
-          <span style={{ fontWeight: "600" }}>플레이 스타일</span>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 8 }}>
+        <div className="field">
+          <span className="label">플레이 스타일</span>
+          <div className="field-group row gap grid-4">
             {PLAY_STYLES.map((opt) => {
               const selected = criteria.playStyles.includes(opt);
               return (
@@ -92,14 +86,7 @@ export default function RecommendationsPlayersPage() {
                       playStyles: toggleValue(c.playStyles, opt),
                     }))
                   }
-                  style={{
-                    padding: "6px 12px",
-                    borderRadius: "6px",
-                    border: `1px solid ${selected ? "blue" : "#ccc"}`,
-                    backgroundColor: selected ? "#d7efff" : "#fff",
-                    cursor: "pointer",
-                    fontSize: "0.9rem",
-                  }}
+                  className={`chip ${selected ? "selected" : ""}`}
                 >
                   {opt}
                 </button>
@@ -109,9 +96,9 @@ export default function RecommendationsPlayersPage() {
         </div>
 
         {/* 자신 있는 능력 */}
-        <div>
-          <span style={{ fontWeight: "600" }}>자신 있는 능력</span>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 8 }}>
+        <div className="field">
+          <span className="label">자신 있는 능력</span>
+          <div className="field-group row gap grid-4">
             {PLAYER_SKILLS.map((opt) => {
               const selected = criteria.skills.includes(opt);
               return (
@@ -124,14 +111,7 @@ export default function RecommendationsPlayersPage() {
                       skills: toggleValue(c.skills, opt),
                     }))
                   }
-                  style={{
-                    padding: "6px 12px",
-                    borderRadius: "6px",
-                    border: `1px solid ${selected ? "blue" : "#ccc"}`,
-                    backgroundColor: selected ? "#e6f5ff" : "#fff",
-                    cursor: "pointer",
-                    fontSize: "0.9rem",
-                  }}
+                  className={`chip ${selected ? "selected" : ""}`}
                 >
                   {opt}
                 </button>
@@ -143,23 +123,16 @@ export default function RecommendationsPlayersPage() {
         {/* 버튼 */}
         <button
           type="submit"
-          style={{
-            padding: "10px 24px",
-            borderRadius: "8px",
-            backgroundColor: "#007bff",
-            color: "#fff",
-            border: "none",
-            fontSize: "1rem",
-            width: "fit-content",
-          }}
+          className="submit"
+          disabled={loading}
         >
           선수 찾기
         </button>
       </form>
 
       {/* 결과 */}
-      {loading && <div style={{ marginTop: 16 }}>불러오는 중…</div>}
-      {error && <div style={{ marginTop: 16, color: "crimson" }}>{error}</div>}
+      {loading && <div className="hint">불러오는 중…</div>}
+      {error && <div className="hint error">{error}</div>}
 
       <ul
         style={{
@@ -174,12 +147,7 @@ export default function RecommendationsPlayersPage() {
           <li
             key={r.id || idx}
             onClick={() => navigate(`/recommendations/players/${idx}`)}
-            style={{
-              border: "1px solid #eee",
-              borderRadius: 8,
-              padding: 12,
-              cursor: "pointer",
-            }}
+            className="chip-result"
           >
             <div>Name: {r.name}</div>
             <div>Position: {r.position}</div>

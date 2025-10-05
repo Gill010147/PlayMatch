@@ -1,138 +1,241 @@
+/* MyPage.css */
+
 .mypage-wrap {
-  max-width: 720px;
-  margin: 0 auto;
-  padding: 16px 16px 28px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #333;
 }
 
 .mypage-top {
+  background-color: #fff;
+  padding: 16px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
   display: flex;
   justify-content: center;
+  align-items: center;
 }
 
 .mypage-logo {
-  height: 64px;
+  height: 40px;
 }
 
 .mypage-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: #57a455;
+  background-color: #4CAF50; /* A vibrant green for the header */
   color: #fff;
+  padding: 24px 16px;
+  margin: 24px auto;
+  max-width: 720px;
   border-radius: 12px;
-  padding: 18px 18px;
-}
-
-.profile-left .user-name {
-  font-size: 36px;
-  font-weight: 800;
-}
-
-.stars {
-  margin-top: 8px;
-  letter-spacing: 4px;
-  font-size: 24px;
-}
-
-.tags-row {
-  margin-top: 8px;
   display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.profile-left {
+  display: flex;
+  flex-direction: column;
   gap: 8px;
 }
 
-.tag {
-  background: rgba(0,0,0,0.25);
-  color: #fff;
-  padding: 4px 10px;
-  border-radius: 8px;
+.user-name {
+  font-size: 2em;
   font-weight: 700;
 }
 
-.meta-row {
-  display: flex;
-  gap: 12px;
-  margin-top: 12px;
+.tags-row .tag {
+  background-color: rgba(255,255,255,0.2);
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 0.8em;
+  margin-right: 6px;
 }
 
-.pill {
-  background: rgba(0,0,0,0.25);
+.meta-row .pill {
+  background-color: rgba(255,255,255,0.1);
+  border-radius: 20px;
   padding: 6px 12px;
-  border-radius: 8px;
-  font-weight: 700;
+  font-size: 0.85em;
+  margin-right: 8px;
 }
 
 .profile-right {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
 }
 
 .avatar {
-  width: 92px;
-  height: 92px;
-  border-radius: 9999px;
-  background: #ececec;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background-color: rgba(255,255,255,0.3);
+  border: 3px solid rgba(255,255,255,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 3em;
+  color: #fff;
+  overflow: hidden;
 }
 
 .team-btn {
-  background: #2f7efc;
+  background-color: #004C99; /* Deep blue for team button */
   color: #fff;
   border: none;
-  border-radius: 16px;
-  padding: 6px 10px;
+  padding: 8px 16px;
+  border-radius: 8px;
   cursor: pointer;
-  font-weight: 700;
+  font-weight: 600;
+  transition: background-color 0.2s ease;
+}
+
+.team-btn:hover {
+  background-color: #003366;
 }
 
 .card {
-  background: #f1f1f1;
+  background-color: #fff;
   border-radius: 12px;
-  margin-top: 16px;
-  padding: 14px 14px 18px;
+  padding: 20px;
+  margin: 16px auto;
+  max-width: 720px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  transition: all 0.2s ease-in-out;
+}
+
+.card:hover {
+  box-shadow: 0 6px 16px rgba(0,0,0,0.12);
 }
 
 .card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-weight: 700;
-  color: #222;
-}
-
-.chev {
-  color: #7a7a7a;
-  font-size: 22px;
+  margin-bottom: 12px;
+  font-size: 1.1em;
+  font-weight: 600;
+  color: #333;
 }
 
 .chip-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
-  margin-top: 14px;
+  gap: 8px;
 }
 
 .chip {
-  display: inline-block;
-  background: #fff;
-  border-radius: 10px;
-  padding: 7px 14px;
-  color: #333;
-  font-weight: 700;
-  border: 1px solid #ddd;
+  background-color: #e0e0e0;
+  border-radius: 20px;
+  padding: 6px 12px;
+  font-size: 0.85em;
+  color: #555;
 }
 
-.footer-action {
-  margin-top: 16px;
+.edit-profile-btn {
+  transition: background-color 0.2s ease;
 }
 
-.save-btn {
-  width: 100%;
-  background: #4caf50;
-  color: #fff;
-  border: none;
-  padding: 10px 12px;
-  border-radius: 6px;
-  font-weight: 700;
-  cursor: pointer;
+.edit-profile-btn:hover {
+  background-color: rgba(70, 55, 238, 0.8);
+}
+
+/* 일반적인 버튼 스타일 */
+.soccer-ball-button {
+    /* 버튼 크기를 이미지에 맞게 조정 (예: 60x60 픽셀) */
+    width: 60px;
+    height: 60px;
+    
+    /* 테두리 및 기본 배경 제거 */
+    border: none;
+    background: none;
+    
+    /* 이미지 경로 설정 및 정렬 */
+    background-image: url("soccerball.png");
+    background-size: cover; /* 버튼 크기에 맞게 이미지를 채움 */
+    background-repeat: no-repeat;
+    background-position: center;
+    
+    /* 텍스트(정보 수정)를 화면 밖으로 이동시켜 숨김 */
+    /* text-indent: -9999px; */ /* 숨김 처리 제거 */
+    /* white-space: nowrap; */ /* 숨김 처리 제거 */
+    
+    /* 마우스 커서 변경 및 공이 굴러가는 듯한 호버 효과 추가 */
+    cursor: pointer;
+    /* transition: transform 0.6s ease-out; */ /* 전환 효과 제거 */
+    
+    /* 텍스트 스타일 조정 */
+    color: rgb(244, 5, 53); /* 축구공 이미지 위에 잘 보이도록 진한 빨간색으로 설정 */
+    font-size: 17px; /* 글씨 크기 조정 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.soccer-ball-button:hover {
+    /* 호버 시 transform 효과는 애니메이션으로 대체됩니다. */
+}
+
+@keyframes scoreGoalAnimation {
+    0% {
+        transform: translateY(0) translateX(0) scale(1) rotate(0deg);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(-200px) translateX(150px) scale(0.5) rotate(720deg); /* 목표 지점, 크기, 회전 및 투명도 */
+        opacity: 0;
+    }
+}
+
+.score-animation {
+    animation: scoreGoalAnimation 1.5s ease-out forwards; /* 1.5초 동안 실행, 마지막 상태 유지 */
+}
+
+@keyframes rollRightAndDisappear {
+    0% {
+        transform: rotate(0deg) translateX(0) scale(1);
+    }
+    50% {
+        transform: rotate(360deg) translateX(100px) scale(1);
+    }
+    100% {
+        transform: rotate(720deg) translateX(200vw) scale(0);
+        opacity: 0;
+    }
+}
+
+.roll-animation {
+    animation: rollRightAndDisappear 1s ease-in-out forwards;
+}
+
+/* 골대 그물 느낌 배경 */
+.card {
+  background-color: #2c3e50; /* 어두운 배경 */
+  background-image:
+    repeating-linear-gradient(0deg, #34495e, #34495e 1px, transparent 1px, transparent 20px),
+    repeating-linear-gradient(90deg, #34495e, #34495e 1px, transparent 1px, transparent 20px);
+  background-size: 20px 20px;
+  color: #ecf0f1; /* 밝은 텍스트 색상 */
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.card .card-header span, .card .chip {
+  color: #ecf0f1; /* 그물 배경에 맞게 텍스트 색상 조정 */
+  background-color: rgba(255,255,255,0.1);
+  border-color: rgba(255,255,255,0.3);
+}
+
+.card .card-header .chev {
+  color: #ecf0f1;
+}
+
+.card .chip-row .chip {
+  color: #ecf0f1;
+  background-color: rgba(255,255,255,0.15);
+}
+
+.card:hover {
+  box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+  transform: translateY(-2px);
 }

@@ -21,3 +21,5 @@ export const PLAYER_SKILLS = [
   "리더십", "의사소통", "적응력"
 ];
 
+
+

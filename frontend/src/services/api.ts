@@ -177,7 +177,7 @@ const MatchesServiceMock = {
   },
 };
 
-export const MatchesService = useMocks ? MatchesServiceMock : MatchesServiceHttp;
+export const MatchesService = import.meta.env.VITE_USE_MOCK_API === 'true' ? MatchesServiceMock : MatchesServiceHttp;
 
 // Real service
 const RecommendationsServiceHttp = {
@@ -254,58 +254,46 @@ export const ReviewsService = {
     apiRequest({ method: "GET", path: `/api/reviews/teams/${teamId}` }),
 };
 
+const VIDEO_FEEDBACK_STORAGE_KEY = "playmatch.videoFeedbacks";
+
 export const VideoFeedbackService = {
+  _readAll(): any[] {
+    try {
+      const raw = localStorage.getItem(VIDEO_FEEDBACK_STORAGE_KEY);
+      if (!raw) return [];
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  },
+  _writeAll(list: any[]) {
+    localStorage.setItem(VIDEO_FEEDBACK_STORAGE_KEY, JSON.stringify(list));
+  },
   list: async () => {
-    // Mock data for video feedback list
-    return [
-      {
-        id: "1",
-        title: "경기 영상 피드백 1",
-        videoUrl: "https://www.w3schools.com/html/mov_bbb.mp4",
-        uploadDate: "2023-10-26",
-        commentsCount: 5,
-      },
-      {
-        id: "2",
-        title: "슈팅 자세 교정 요청",
-        videoUrl: "https://www.w3schools.com/html/movie.mp4",
-        uploadDate: "2023-10-25",
-        commentsCount: 12,
-      },
-    ];
+    return VideoFeedbackService._readAll();
   },
   detail: async (videoId: string) => {
-    // Mock data for video feedback detail
-    const comments = [
-      { id: "c1", author: "사용자 A", text: "정말 좋은 영상입니다!", timestamp: "2023-10-26 10:00" },
-      { id: "c2", author: "사용자 B", text: "이 부분에서 패스가 좋았어요.", timestamp: "2023-10-26 10:15" },
-    ];
-    return {
-      id: videoId,
-      title: `경기 영상 피드백 ${videoId}`,
-      videoUrl: videoId === "1" ? "https://www.w3schools.com/html/mov_bbb.mp4" : "https://www.w3schools.com/html/movie.mp4",
-      description: `이 영상은 경기 영상 피드백 #${videoId}에 대한 상세 설명입니다. 개선할 점이나 궁금한 점을 댓글로 남겨주세요.`,
-      uploadDate: `2023-10-2${videoId}`,
-      comments: comments,
-    };
+    const list = VideoFeedbackService._readAll();
+    return (list.find((f) => f.id === videoId) || null) as any;
   },
   addComment: async (videoId: string, commentText: string) => {
-    // Simulate adding a comment
     console.log(`Adding comment to video ${videoId}: ${commentText}`);
     return { success: true };
   },
   uploadVideoFeedback: async (payload: { title: string; description: string; videoFile: File }) => {
-    // Simulate video upload and saving metadata
-    console.log("Mock: Uploading video feedback", payload);
-    const newId = (Math.random() * 1000).toFixed(0);
+    const list = VideoFeedbackService._readAll();
+    const newId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
     const newFeedback = {
       id: newId,
       title: payload.title,
-      videoUrl: URL.createObjectURL(payload.videoFile), // Use a blob URL for mock preview
+      description: payload.description,
+      videoUrl: URL.createObjectURL(payload.videoFile),
       uploadDate: new Date().toISOString().split('T')[0],
       commentsCount: 0,
     };
-    // In a real app, you would save this to a backend and get a real URL
+    list.unshift(newFeedback); // Add to the beginning
+    VideoFeedbackService._writeAll(list);
     return newFeedback;
   },
 };

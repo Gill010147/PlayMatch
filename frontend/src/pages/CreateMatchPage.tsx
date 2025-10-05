@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import logo from "../logo.png";
 import { useNavigate } from "react-router-dom";
 import { MatchesService } from "../services/api";
+import { useMatches } from '../contexts/MatchesContext';
 
 declare global {
   interface Window {
@@ -11,6 +12,7 @@ declare global {
 
 export default function CreateMatchPage() {
   const navigate = useNavigate();
+  const { fetchMatches } = useMatches();
   const [title, setTitle] = useState("");
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
@@ -43,6 +45,7 @@ export default function CreateMatchPage() {
         duration,
       });
       alert("경기가 생성되었습니다.");
+      fetchMatches(); // Call fetchMatches to refresh the list
       navigate("/");
     } catch (err: any) {
       console.error(err);
