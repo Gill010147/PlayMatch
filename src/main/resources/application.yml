@@ -11,6 +11,9 @@ spring:
       hibernate:
         format_sql: true
 
+file:
+  upload-dir: ./uploads
+
 # --- 구분선 ---
 ---
 

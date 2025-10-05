@@ -1,5 +1,6 @@
 package com.playmatch.playmatch.dto;
 
+import com.playmatch.playmatch.domain.Team;
 import com.playmatch.playmatch.domain.User;
 import lombok.Getter;
 
@@ -15,6 +16,20 @@ public class ProfileResponseDto {
     private final List<String> playStyles;
     private final List<String> positions;
     private final List<String> skills;
+    private final TeamDto team;
+
+    @Getter
+    public static class TeamDto {
+        private final Integer id;
+        private final String name;
+        private final String teamLogo;
+
+        public TeamDto(Team team) {
+            this.id = team.getId();
+            this.name = team.getName();
+            this.teamLogo = team.getTeamLogo();
+        }
+    }
 
     public ProfileResponseDto(User user) {
         this.email = user.getEmail();
@@ -25,5 +40,9 @@ public class ProfileResponseDto {
         this.playStyles = user.getPlayStyles();
         this.positions = user.getPositions();
         this.skills = user.getSkills();
+        this.team = user.getTeamMemberships().stream()
+                .findFirst()
+                .map(teamMembership -> new TeamDto(teamMembership.getTeam()))
+                .orElse(null);
     }
 }

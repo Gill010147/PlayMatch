@@ -39,3 +39,10 @@ out/
 ### Data ###
 pgdata/
 redisdata/
+
+### Uploads ###
+uploads/
+
+### Node ###
+node_modules/
+.env
