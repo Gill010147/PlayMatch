@@ -6,6 +6,7 @@ export default function CreateTeamProfilePage() {
   const navigate = useNavigate();
   const [teamName, setTeamName] = useState("");
   const [shortIntroduction, setShortIntroduction] = useState("");
+  const [mainArea, setMainArea] = useState("");
   const [teamLogo, setTeamLogo] = useState<File | null>(null);
   const [teamLogoPreview, setTeamLogoPreview] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -49,15 +50,22 @@ export default function CreateTeamProfilePage() {
 
     setSaving(true);
     try {
-      // ✅ FormData 생성 (파일 포함)
       const formData = new FormData();
-      formData.append("teamName", teamName);
-      formData.append("shortIntroduction", shortIntroduction);
-      if (teamLogo) formData.append("teamLogo", teamLogo);
+      const requestDto = {
+        name: teamName,
+        introduce: shortIntroduction,
+        mainArea: mainArea, // mainArea 추가
+      };
+      formData.append(
+        "requestDto",
+        new Blob([JSON.stringify(requestDto)], { type: "application/json" })
+      );
 
-      await TeamsService.createWithFile(formData); // ✅ 서비스 호출
+      if (teamLogo) formData.append("logo", teamLogo); // 파일은 "logo" 라는 이름으로 전송
+
+      await TeamsService.createWithFile(formData); // 서비스 호출
       alert("팀 프로필이 성공적으로 생성되었습니다.");
-      navigate("/mypage");
+      navigate("/mypage", { state: { refresh: true } });
     } catch (error: any) {
       console.error("팀 프로필 생성 실패:", error);
       alert("팀 프로필 생성 중 오류가 발생했습니다.");
@@ -155,6 +163,29 @@ export default function CreateTeamProfilePage() {
               borderRadius: "4px",
               width: "100%",
               resize: "vertical",
+            }}
+            required
+          />
+        </div>
+
+        <div>
+          <label
+            htmlFor="mainArea"
+            style={{ display: "block", marginBottom: "8px", fontWeight: "bold" }}
+          >
+            주요 활동 지역:
+          </label>
+          <input
+            type="text"
+            id="mainArea"
+            value={mainArea}
+            onChange={(e) => setMainArea(e.target.value)}
+            placeholder="주요 활동 지역을 입력해주세요. (예: 서울시 강남구)"
+            style={{
+              border: "1px solid #ddd",
+              padding: "8px",
+              borderRadius: "4px",
+              width: "100%",
             }}
             required
           />

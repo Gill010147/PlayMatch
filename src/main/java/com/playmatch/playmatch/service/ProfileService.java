@@ -16,7 +16,7 @@ public class ProfileService {
 
     @Transactional(readOnly = true)
     public ProfileResponseDto getMyProfile(String email) {
-        User user = userRepository.findByEmail(email).orElseThrow(
+        User user = userRepository.findByEmailWithTeamMemberships(email).orElseThrow(
                 () -> new IllegalArgumentException("사용자를 찾을 수 없습니다.")
         );
         return new ProfileResponseDto(user);

@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { AuthService, ApiError } from "../services/api";
 import "./MyPage.css";
 import logoImg from "../logo.png";
 
 export default function MyPage() {
   const navigate = useNavigate();
+  const location = useLocation(); // useLocation 훅 사용
   const [name, setName] = useState<string>("");
   const [birthYear, setBirthYear] = useState<string>(""); // age 대신 birthYear 상태 사용
   const [gender, setGender] = useState<string>("");
@@ -48,7 +49,7 @@ export default function MyPage() {
     };
 
     fetchProfile();
-  }, []);
+  }, [location.state]); // location.state를 의존성 배열에 추가
 
   return (
     <div className="mypage-wrap" style={{ backgroundColor: "#f9f9f9", minHeight: "100vh" }}> {/* 배경색 추가 */}
@@ -87,9 +88,14 @@ export default function MyPage() {
             )} */}
           </div>
           {teamId ? (
-            <button className="team-btn" onClick={() => navigate(`/profiles/teams/${teamId}/edit`)}>
-              팀 수정
-            </button>
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <button className="team-btn" onClick={() => navigate(`/profiles/teams/${teamId}`)}>
+                팀 프로필 보기
+              </button>
+              <button className="team-btn" onClick={() => navigate(`/profiles/teams/${teamId}/edit`)}>
+                팀 수정
+              </button>
+            </div>
           ) : (
             <button className="team-btn" onClick={() => navigate("/profiles/teams/create")}>
               팀 등록하기

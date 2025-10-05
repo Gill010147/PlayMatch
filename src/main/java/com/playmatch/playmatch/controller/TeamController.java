@@ -8,9 +8,11 @@ import com.playmatch.playmatch.service.TeamService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.security.Principal;
 import java.util.List;
@@ -22,10 +24,12 @@ public class TeamController {
 
     private final TeamService teamService;
 
-    @PostMapping
+    @PostMapping(consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<String> createTeam(@Valid @RequestBody TeamRequestDto requestDto, Principal principal) {
-        teamService.createTeam(requestDto, principal.getName());
+    public ResponseEntity<String> createTeam(@Valid @RequestPart("requestDto") TeamRequestDto requestDto,
+                                             @RequestPart(value = "logo", required = false) MultipartFile logo,
+                                             Principal principal) {
+        teamService.createTeam(requestDto, logo, principal.getName());
         return ResponseEntity.status(HttpStatus.CREATED).body("팀 생성 완료");
     }
 
