@@ -6,6 +6,8 @@ export interface UserProfile {
   name: string;
   gender?: "male" | "female";
   region?: { city?: string; district?: string; neighborhood?: string; fullAddress?: string };
+  age?: string; // Add age property
+  phone?: string; // Add phone property
   positions?: string[];
   playStyles?: string[];
   skills?: string[];

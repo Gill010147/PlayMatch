@@ -162,7 +162,7 @@
     
     /* 마우스 커서 변경 및 공이 굴러가는 듯한 호버 효과 추가 */
     cursor: pointer;
-    /* transition: transform 0.6s ease-out; */ /* 전환 효과 제거 */
+    transition: transform 0.6s ease-out; /* 전환 효과 추가 */
     
     /* 텍스트 스타일 조정 */
     color: rgb(244, 5, 53); /* 축구공 이미지 위에 잘 보이도록 진한 빨간색으로 설정 */
@@ -174,7 +174,7 @@
 }
 
 .soccer-ball-button:hover {
-    /* 호버 시 transform 효과는 애니메이션으로 대체됩니다. */
+    transform: rotate(360deg) scale(1.05); /* 360도 회전하며 5% 확대 */
 }
 
 @keyframes scoreGoalAnimation {

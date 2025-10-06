@@ -2,6 +2,14 @@
 // Lightweight API client scaffolding for future integration
 // Backend teammate can replace baseUrl and implement real auth headers/interceptors
 
+import type { UserProfile, ProfileRequestDto } from "../../types/domain";
+
+// Temporarily re-defining UserProfile here to try and force linter recognition
+interface UserProfileWithAgeAndPhone extends UserProfile {
+  age?: string;
+  phone?: string;
+}
+
 export type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 
 export interface ApiRequestOptions {
@@ -96,7 +104,7 @@ export const AuthService = {
   logout: async () =>
     apiRequest({ method: "POST", path: "/api/auth/logout" }),
   me: async () =>
-    apiRequest({ method: "GET", path: "/api/users/me" }),
+    apiRequest<UserProfileWithAgeAndPhone>({ method: "GET", path: "/api/users/me" }),
 };
 
 export const ProfilesService = {
