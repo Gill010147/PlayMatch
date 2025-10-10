@@ -1,35 +1,31 @@
 package com.playmatch.playmatch.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.playmatch.playmatch.domain.ChatRoom;
 import com.playmatch.playmatch.domain.User;
 import lombok.Getter;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Getter
 public class ChatRoomResponseDto {
 
-    @JsonProperty("roomId")
-    private final Long roomId;
-    private final List<ParticipantDto> participants;
+    private final Long id;
+    private final String name;
+    private final LocalDateTime lastMessageAt;
 
-    public ChatRoomResponseDto(ChatRoom chatRoom) {
-        this.roomId = chatRoom.getId();
-        this.participants = chatRoom.getMembers().stream()
-                .map(member -> new ParticipantDto(member.getUser()))
-                .collect(Collectors.toList());
-    }
+    public ChatRoomResponseDto(ChatRoom chatRoom, User currentUser) {
+        this.id = chatRoom.getId();
+        this.lastMessageAt = chatRoom.getCreatedAt(); // 우선 생성 시간으로 초기화
 
-    @Getter
-    private static class ParticipantDto {
-        private final Integer userId;
-        private final String name;
-
-        public ParticipantDto(User user) {
-            this.userId = user.getId();
-            this.name = user.getName();
+        if (chatRoom.getName() != null && !chatRoom.getName().isEmpty()) {
+            this.name = chatRoom.getName(); // 그룹 채팅방의 경우
+        } else { // 1:1 채팅방의 경우 상대방 이름으로 설정
+            Optional<User> otherUser = chatRoom.getMembers().stream()
+                    .map(member -> member.getUser())
+                    .filter(user -> !user.getId().equals(currentUser.getId()))
+                    .findFirst();
+            this.name = otherUser.map(User::getName).orElse("알 수 없는 상대");
         }
     }
 }

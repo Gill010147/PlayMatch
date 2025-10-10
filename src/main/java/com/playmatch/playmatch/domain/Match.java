@@ -47,6 +47,9 @@ public class Match {
     @Column(nullable = false)
     private Integer maxMemberCount;
 
+    @Column(nullable = false)
+    private String venueType;
+
     @Column(columnDefinition = "TEXT")
     private String description;
 

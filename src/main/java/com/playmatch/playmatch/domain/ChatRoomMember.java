@@ -3,6 +3,8 @@ package com.playmatch.playmatch.domain;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "chat_room_members")
 @Getter
@@ -22,9 +24,16 @@ public class ChatRoomMember {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    private LocalDateTime lastReadAt;
+
     @Builder
     public ChatRoomMember(ChatRoom chatRoom, User user) {
         this.chatRoom = chatRoom;
         this.user = user;
+        this.lastReadAt = LocalDateTime.now(); // 생성 시 현재 시간으로 초기화
+    }
+
+    public void updateLastReadAt() {
+        this.lastReadAt = LocalDateTime.now();
     }
 }

@@ -38,5 +38,8 @@ public class CreateMatchRequestDto {
     @NotNull(message = "최대 인원 수는 필수입니다.")
     private Integer maxMemberCount;
 
+    @NotBlank(message = "장소 유형은 필수입니다.")
+    private String venueType; // INDOOR or OUTDOOR
+
     private String description;
 }

@@ -48,6 +48,7 @@ public class MatchService {
                 .latitude(requestDto.getLatitude())
                 .longitude(requestDto.getLongitude())
                 .matchType(requestDto.getMatchType())
+                .venueType(requestDto.getVenueType())
                 .description(requestDto.getDescription())
                 .maxMemberCount(requestDto.getMaxMemberCount())
                 .status(MatchStatus.RECRUITING)

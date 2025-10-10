@@ -22,7 +22,7 @@ public class ChatApiController {
     @PostMapping("/rooms")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<ChatRoomResponseDto> findOrCreateRoom(@RequestBody ChatRoomRequestDto requestDto, Principal principal) {
-        ChatRoomResponseDto room = chatService.findOrCreateRoom(requestDto.getOtherUserEmail(), principal.getName());
+        ChatRoomResponseDto room = chatService.findOrCreateRoom(requestDto.getParticipantId(), principal.getName());
         return ResponseEntity.ok(room);
     }
 
@@ -38,5 +38,19 @@ public class ChatApiController {
     public ResponseEntity<List<ChatRoomResponseDto>> getMyRooms(Principal principal) {
         List<ChatRoomResponseDto> rooms = chatService.getMyRooms(principal.getName());
         return ResponseEntity.ok(rooms);
+    }
+
+    @PostMapping("/rooms/{roomId}/read")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<Void> updateLastReadTime(@PathVariable Long roomId, Principal principal) {
+        chatService.updateLastReadTime(roomId, principal.getName());
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/unread-count")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<java.util.Map<String, Integer>> getUnreadMessageCount(Principal principal) {
+        int count = chatService.getUnreadMessageCount(principal.getName());
+        return ResponseEntity.ok(java.util.Collections.singletonMap("count", count));
     }
 }

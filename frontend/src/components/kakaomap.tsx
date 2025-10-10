@@ -1,13 +1,16 @@
 import { useEffect, useRef } from "react";
 import './kakaomap.css';
 
+// 백엔드의 MatchResponseDto와 일치하는 인터페이스
 interface Match {
-  id: string;
-  time: string;
-  location: string;
-  type: string;
-  teams: string;
+  id: number;
+  title: string;
+  hostTeamName: string;
+  matchDate: string; // JSON으로 변환되면서 string이 됨
+  locationName: string;
   status: string;
+  memberCount: number;
+  maxMemberCount: number;
 }
 
 interface KakaoMapProps {
@@ -61,80 +64,75 @@ export default function KakaoMap({ matches }: KakaoMapProps) {
     let hasAnyVisible = false;
 
     matches.forEach(match => {
-      geocoder.addressSearch(match.location, (result: any, status: any) => {
-        if (status === kakao.maps.services.Status.OK) {
-          const coords = new kakao.maps.LatLng(result[0].y, result[0].x);
+      if (match.locationName && match.locationName.trim() !== '') {
+        geocoder.addressSearch(match.locationName, (result: any, status: any) => {
+          if (status === kakao.maps.services.Status.OK) {
+            const coords = new kakao.maps.LatLng(result[0].y, result[0].x);
+            
+            const marker = new kakao.maps.Marker({
+              map,
+              position: coords,
+            });
+
+            const infowindow = new kakao.maps.InfoWindow({
+              content: `
+                <div style="padding: 15px; min-width: 250px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+                  <div style="display: flex; align-items: center; margin-bottom: 12px;">
+                    <div style="width: 8px; height: 8px; border-radius: 50%; background-color: ${match.status === 'RECRUITING' ? '#4CAF50' : '#FF5722'}; margin-right: 8px;"></div>
+                    <span style="font-size: 12px; color: ${match.status === 'RECRUITING' ? '#4CAF50' : '#FF5722'}; font-weight: 600; text-transform: uppercase;">
+                      ${match.status === 'RECRUITING' ? '모집중' : '마감'}
+                    </span>
+                  </div>
+                  <h3 style="margin: 0 0 8px 0; color: #333; font-size: 16px; font-weight: 600;">${match.title}</h3>
+                  <div style="margin-bottom: 8px;">
+                    <span style="color: #666; font-size: 13px;">⏰ ${new Date(match.matchDate).toLocaleString()}</span>
+                  </div>
+                  <div style="margin-bottom: 8px;">
+                    <span style="color: #666; font-size: 13px;">📍 ${match.locationName}</span>
+                  </div>
+                  <div style="margin-bottom: 0;">
+                    <span style="color: #666; font-size: 13px;">👥 ${match.memberCount} / ${match.maxMemberCount}</span>
+                  </div>
+                </div>
+              `,
+              removable: true,
+              zIndex: 1000
+            });
+
+            kakao.maps.event.addListener(marker, 'click', function() {
+              infowindow.open(map, marker);
+            });
+
+            markersRef.current.push(marker);
+            infoWindowsRef.current.push(infowindow);
+            bounds.extend(coords);
+            hasAnyVisible = true;
+          } else {
+            console.warn(`주소 검색 실패: ${match.locationName}`);
+          }
           
-          // 마커 생성
-          const marker = new kakao.maps.Marker({
-            map,
-            position: coords,
-          });
-
-          // 인포윈도우 생성
-          const infowindow = new kakao.maps.InfoWindow({
-            content: `
-              <div style="padding: 15px; min-width: 250px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
-                <div style="display: flex; align-items: center; margin-bottom: 12px;">
-                  <div style="width: 8px; height: 8px; border-radius: 50%; background-color: ${match.status === 'open' ? '#4CAF50' : '#FF5722'}; margin-right: 8px;"></div>
-                  <span style="font-size: 12px; color: ${match.status === 'open' ? '#4CAF50' : '#FF5722'}; font-weight: 600; text-transform: uppercase;">
-                    ${match.status === 'open' ? '모집중' : '마감'}
-                  </span>
-                </div>
-                <h3 style="margin: 0 0 8px 0; color: #333; font-size: 16px; font-weight: 600;">${match.teams}</h3>
-                <div style="margin-bottom: 8px;">
-                  <span style="color: #666; font-size: 13px;">⏰ ${match.time}</span>
-                </div>
-                <div style="margin-bottom: 8px;">
-                  <span style="color: #666; font-size: 13px;">📍 ${match.location}</span>
-                </div>
-                <div style="margin-bottom: 0;">
-                  <span style="color: #666; font-size: 13px;">🏟️ ${match.type}</span>
-                </div>
-              </div>
-            `,
-            removable: true,
-            zIndex: 1000
-          });
-
-          // 마커 클릭 시 인포윈도우 표시
-          kakao.maps.event.addListener(marker, 'click', function() {
-            infowindow.open(map, marker);
-          });
-
-          markersRef.current.push(marker);
-          infoWindowsRef.current.push(infowindow);
-          bounds.extend(coords);
-          hasAnyVisible = true;
-        } else {
-          console.warn(`주소 검색 실패: ${match.location}`);
-        }
-        // 모든 주소 검색 콜백이 비동기로 들어오므로, 현재 콜백에서도 bounds가 갱신될 때마다 지도 범위를 맞춰준다
-        if (hasAnyVisible) {
-          map.setBounds(bounds);
-        }
-      });
+          if (hasAnyVisible) {
+            map.setBounds(bounds);
+          }
+        });
+      }
     });
-    // matches가 빈 배열인 경우 지도 범위만 초기화 (마커는 위에서 이미 제거됨)
+
     if (!matches.length) {
-      // 선택적으로 기본 중심으로 이동하고 확대 레벨 설정
       map.setLevel(7);
     }
   }, [matches]);
 
   const handlePopupClick = () => {
-    // 경기 데이터를 URL 파라미터로 전달
     const matchesParam = encodeURIComponent(JSON.stringify(matches));
     const popupUrl = `/popup-map.html?matches=${matchesParam}`;
     
-    // 팝업창 열기
     const popup = window.open(
       popupUrl,
       'mapPopup',
       'width=800,height=600,scrollbars=yes,resizable=yes,location=yes,status=yes'
     );
     
-    // 팝업이 차단된 경우 처리
     if (!popup || popup.closed || typeof popup.closed === 'undefined') {
       alert('팝업이 차단되었습니다. 팝업 차단을 해제해주세요.');
     }

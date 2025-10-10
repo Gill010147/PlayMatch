@@ -20,4 +20,6 @@ public interface ChatRoomMemberRepository extends JpaRepository<ChatRoomMember, 
            "WHERE crm1.user.id = :user1Id AND crm2.user.id = :user2Id " +
            "AND (SELECT COUNT(m) FROM cr.members m) = 2")
     Optional<ChatRoom> findExistingChatRoom(@Param("user1Id") Integer user1Id, @Param("user2Id") Integer user2Id);
+
+    Optional<ChatRoomMember> findByChatRoomAndUser(ChatRoom chatRoom, User user);
 }

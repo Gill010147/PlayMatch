@@ -8,6 +8,7 @@ import java.util.List;
 
 @Getter
 public class ProfileResponseDto {
+    private final Integer id; // 사용자 ID 필드 추가
     private final String email;
     private final String name;
     private final String area;
@@ -32,6 +33,7 @@ public class ProfileResponseDto {
     }
 
     public ProfileResponseDto(User user) {
+        this.id = user.getId();
         this.email = user.getEmail();
         this.name = user.getName();
         this.area = user.getArea();

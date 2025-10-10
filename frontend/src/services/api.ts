@@ -251,6 +251,14 @@ export const ChatService = {
   // 메시지 전송 (WebSocket 대신 HTTP로도 가능)
   sendMessage: async (roomId: string, content: string) =>
     apiRequest({ method: "POST", path: `/api/chat/rooms/${roomId}/messages`, body: { content } }),
+
+  // 마지막 읽은 시간 업데이트
+  updateReadTime: async (roomId: string) =>
+    apiRequest({ method: "POST", path: `/api/chat/rooms/${roomId}/read` }),
+
+  // 안 읽은 메시지 개수 조회
+  getUnreadCount: async () =>
+    apiRequest<{ count: number }>({ method: "GET", path: "/api/chat/unread-count" }),
 };
 
 export const ReviewsService = {

@@ -39,17 +39,18 @@ export interface MatchResponseDto {
 }
 
 export interface ChatRoom {
-  id: string;
+  id: number;
   name: string;
   lastMessageAt?: string;
 }
 
 export interface ChatMessage {
-  id: string;
-  roomId: string;
-  senderId: string;
-  content: string;
+  messageId: number;
+  senderId: number;
+  senderName: string;
+  message: string;
   createdAt: string;
+  roomId: string; // 이 필드는 STOMP 메시지 본문에는 없지만, 클라이언트에서 필요할 수 있음
 }
 
 export interface Review {

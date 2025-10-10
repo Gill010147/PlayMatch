@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import { ChatService } from "../services/api"; // ChatService 임포트
 import "./NavBar.css";
-import logo from "../logo.png"; // 위치에 맞게 수정
+import logo from "../logo.png";
 import soccerball from './soccerball.webp';
 import futsal from './futsal.png';
 import team from './team.png';
@@ -11,14 +11,14 @@ import feedback from './feedback.png';
 const NavBar: React.FC = () => {
   const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+  const [unreadCount, setUnreadCount] = useState(0);
 
+  // 로그인 상태 감지
   useEffect(() => {
     const updateAuthState = () => {
       setIsLoggedIn(!!localStorage.getItem("token"));
     };
-    // 초기 상태 동기화
     updateAuthState();
-    // 커스텀 이벤트 및 storage 이벤트 수신
     const onAuthChanged = () => updateAuthState();
     window.addEventListener("auth:changed", onAuthChanged as EventListener);
     window.addEventListener("storage", onAuthChanged as EventListener);
@@ -28,17 +28,38 @@ const NavBar: React.FC = () => {
     };
   }, []);
 
-  // 로그아웃 API 호출
+  // 안 읽은 메시지 개수 폴링
+  useEffect(() => {
+    if (!isLoggedIn) {
+      setUnreadCount(0);
+      return;
+    }
+
+    const fetchUnreadCount = async () => {
+      try {
+        const data = await ChatService.getUnreadCount();
+        setUnreadCount(data.count);
+      } catch (error) {
+        console.error("Failed to fetch unread count:", error);
+      }
+    };
+
+    fetchUnreadCount(); // 최초 실행
+    const intervalId = setInterval(fetchUnreadCount, 15000); // 15초마다 반복
+
+    return () => clearInterval(intervalId); // 컴포넌트 언마운트 시 인터벌 정리
+  }, [isLoggedIn]);
+
   const handleLogout = async () => {
     try {
-      await axios.post("/api/auth/logout"); // 백엔드 세션/토큰 무효화 요청
+      // 로그아웃 API 호출은 선택사항 (백엔드에 따라)
+      // await ChatService.logout(); 
     } catch (error) {
-      console.error("서버 로그아웃 실패:", error);
-      // 서버 에러가 나더라도 클라이언트 쪽에서는 토큰 제거
+      console.error("Server logout failed:", error);
     } finally {
       localStorage.removeItem("token");
       window.dispatchEvent(new Event("auth:changed"));
-      navigate("/login"); // 로그아웃 후 로그인 페이지로 이동
+      navigate("/login");
     }
   };
 
@@ -53,7 +74,6 @@ const NavBar: React.FC = () => {
         marginTop: "30px",
       }}
     >
-      {/* 로고 */}
       <img
         src={logo}
         alt="Play Match Logo"
@@ -61,7 +81,6 @@ const NavBar: React.FC = () => {
         onClick={() => navigate('/')}
       />
 
-      {/* 로그인/로그아웃 + 아이콘 버튼 */}
       <div
         className="nav-login"
         style={{
@@ -91,25 +110,13 @@ const NavBar: React.FC = () => {
           </button>
         )}
         <button className="icon-button" aria-label="마이페이지" onClick={() => navigate('/mypage')}>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="22"
-            height="22"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
-          >
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
             <circle cx="12" cy="7" r="4" />
           </svg>
         </button>
       </div>
 
-      {/* 네비게이션 메뉴 */}
       <nav
         className="nav-center-menu"
         aria-label="Center Menu"
@@ -130,7 +137,10 @@ const NavBar: React.FC = () => {
           <div>용병추천</div>
           <div className="nav-menu-eng">Recommend</div>
         </button>
-        <button onClick={() => navigate('/chat/rooms')} className="nav-link nav-menu-item" style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+        <button onClick={() => navigate('/chat/rooms')} className="nav-link nav-menu-item" style={{ background: 'none', border: 'none', cursor: 'pointer', position: 'relative' }}>
+          {unreadCount > 0 && (
+            <span className="notification-badge">{unreadCount > 9 ? '9+' : unreadCount}</span>
+          )}
           <img src={team} alt="팀원 아이콘" className="nav-menu-icon" />
           <div>채팅</div>
           <div className="nav-menu-eng">Chat</div>

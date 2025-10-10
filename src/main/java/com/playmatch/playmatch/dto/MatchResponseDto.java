@@ -13,6 +13,7 @@ public class MatchResponseDto {
     private final Long id;
     private final String title;
     private final String hostTeamName;
+    private final Integer hostUserId;
     private final LocalDateTime matchDate;
     private final String locationName;
     private final MatchStatus status;
@@ -24,6 +25,7 @@ public class MatchResponseDto {
         this.id = match.getId();
         this.title = match.getTitle();
         this.hostTeamName = match.getHostTeam().getName();
+        this.hostUserId = match.getHostTeam().getLeader().getId();
         this.matchDate = match.getMatchDate();
         this.locationName = match.getLocationName();
         this.status = match.getStatus();

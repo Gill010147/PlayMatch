@@ -2,7 +2,7 @@ spring:
   profiles:
     active: test
   datasource:
-    url: jdbc:postgresql://localhost:5434/playmatch_db
+    url: jdbc:postgresql://localhost:5434/playmatch_test
     username: playmatch_user
     password: ghkdqudrlf69150@@
     driver-class-name: org.postgresql.Driver
@@ -12,15 +12,28 @@ spring:
     hibernate:
       ddl-auto: create
     show-sql: true
+    defer-datasource-initialization: true
     properties:
       hibernate:
         format_sql: true
+        hbm2ddl:
+          auto: create
+    open-in-view: false
 
-  # Add Redis config for test environment
+  sql:
+    init:
+      mode: always
+
   data:
     redis:
       host: localhost
-      port: 6379
+      port: 6370
+
+  main:
+    allow-bean-definition-overriding: true
+
+file:
+  upload-dir: ./uploads
 
 jwt:
   secret:
@@ -32,3 +45,5 @@ logging:
   level:
     org.hibernate.SQL: DEBUG
     org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    org.springframework.test.context: DEBUG
+    org.hibernate.tool.schema: DEBUG

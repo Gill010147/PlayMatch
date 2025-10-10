@@ -197,7 +197,7 @@ export default function EditMyProfilePage() {
               {days.map((d) => <option key={d} value={d}>{d}</option>)}
             </select>
           </div>
-          <div>나이: {form.age ? `${form.age}세` : "미설정"}</div>
+          <div>나이: {currentAge ? `${currentAge}세` : "미설정"}</div>
         </div>
 
         {/* 성별 */}

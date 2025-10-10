@@ -1,20 +1,47 @@
 import React from "react";
 import "./recommendmatch.css";
+import { useNavigate } from "react-router-dom";
+import { ChatService } from "../services/api"; // ChatService 임포트
 
+// 백엔드의 MatchResponseDto와 일치하는 인터페이스
 interface Match {
-  id: string;
-  time: string;
-  location: string;
-  type: string;
-  teams: string;
+  id: number;
+  title: string;
+  hostTeamName: string;
+  hostUserId: number; // 주최자 ID 추가
+  matchDate: string;
+  locationName: string;
   status: string;
+  memberCount: number;
+  maxMemberCount: number;
 }
 
 interface RecommendedMatchListProps {
-  matches?: Match[]; // ✅ optional 처리
+  matches?: Match[];
 }
 
 const RecommendedMatchList: React.FC<RecommendedMatchListProps> = ({ matches = [] }) => {
+  const navigate = useNavigate();
+
+  // 경기 아이템 클릭 시 상세 페이지로 이동
+  const handleItemClick = (matchId: number) => {
+    navigate(`/matches/${matchId}`);
+  };
+
+  // '연락하기' 버튼 클릭 시 채팅방 생성/이동
+  const handleContactHost = async (e: React.MouseEvent, hostUserId: number) => {
+    e.stopPropagation(); // 부모 요소(li)의 클릭 이벤트 전파 방지
+    try {
+      // 1:1 채팅방 생성 또는 조회 API 호출
+      const room = await ChatService.createOrGetRoom(String(hostUserId));
+      // 채팅방으로 이동하면서 state에 방 정보를 전달
+      navigate(`/chat/rooms/${room.id}`, { state: { room } });
+    } catch (error) {
+      console.error("채팅방 생성/이동 실패:", error);
+      alert("채팅방을 열 수 없습니다.");
+    }
+  };
+
   return (
     <section className="recommended-matches">
       <h2>추천 Match</h2>
@@ -25,15 +52,16 @@ const RecommendedMatchList: React.FC<RecommendedMatchListProps> = ({ matches = [
           matches.map((match) => (
             <li
               key={match.id}
-              className={`match-item ${match.status === "closed" ? "closed" : "open"}`}
+              className={`match-item ${match.status !== "RECRUITING" ? "closed" : "open"}`}
+              onClick={() => handleItemClick(match.id)}
             >
-              <span className="match-time">{match.time}</span>
-              <span className="match-location">{match.location}</span>
+              <span className="match-time">{new Date(match.matchDate).toLocaleDateString()}</span>
+              <span className="match-location">{match.locationName}</span>
               <span className="match-detail">
-                {match.type} • {match.teams}
+                {match.title}
               </span>
-              <button disabled={match.status === "closed"}>
-                {match.status === "closed" ? "마감임박!" : "신청가능"}
+              <button onClick={(e) => handleContactHost(e, match.hostUserId)}>
+                주최자에게 연락
               </button>
             </li>
           ))

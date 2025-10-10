@@ -27,6 +27,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-websocket'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	runtimeOnly 'org.postgresql:postgresql'
 
 	// JWT (인터넷 대신 로컬 파일에서 직접 가져오도록 변경)
@@ -36,10 +37,15 @@ dependencies {
 
     compileOnly 'org.projectlombok:lombok:1.18.30'
     annotationProcessor 'org.projectlombok:lombok:1.18.30'
+	testCompileOnly 'org.projectlombok:lombok'
+	testAnnotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	        testImplementation 'org.springframework.security:spring-security-test'
-	        testImplementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server' // JWT 테스트 유틸리티에 필요
-	        testRuntimeOnly 'com.h2database:h2'}
-tasks.named('test') {
-	useJUnitPlatform()
-}
+	        	testImplementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server' // JWT 테스트 유틸리티에 필요
+	        	        testRuntimeOnly 'com.h2database:h2'
+	        	        testImplementation ('it.ozimov:embedded-redis:0.7.3') {
+	        	            exclude group: 'org.slf4j', module: 'slf4j-simple'
+	        	        }}
+	        tasks.named('test') {
+	        	useJUnitPlatform()
+	        }

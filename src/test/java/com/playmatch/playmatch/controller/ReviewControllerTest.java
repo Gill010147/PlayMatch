@@ -24,9 +24,13 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
- @ActiveProfiles("test")
- @SpringBootTest @AutoConfigureMockMvc @Transactional
-class ReviewControllerTest {
+import com.playmatch.playmatch.BaseTest;
+
+@ActiveProfiles("test")
+@SpringBootTest
+@AutoConfigureMockMvc
+@Transactional
+class ReviewControllerTest extends BaseTest {
 
     @Autowired private MockMvc mockMvc;
     @Autowired private ObjectMapper objectMapper;
@@ -48,36 +52,92 @@ class ReviewControllerTest {
     @BeforeEach
     void setUp() {
         String encodedPassword = passwordEncoder.encode("password");
-        hostLeader = User.builder().email("host@test.com").password(encodedPassword).name("호스트리더").role(UserRoleEnum.USER).build();
-        mercenary = User.builder().email("mercenary@test.com").password(encodedPassword).name("용병").role(UserRoleEnum.USER).build();
-        opponentLeader = User.builder().email("opponent@test.com").password(encodedPassword).name("상대리더").role(UserRoleEnum.USER).build();
+
+        // 1. Users 생성
+        hostLeader = User.builder()
+                .email("host@test.com")
+                .password(encodedPassword)
+                .name("호스트리더")
+                .role(UserRoleEnum.USER)
+                .build();
+
+        mercenary = User.builder()
+                .email("mercenary@test.com")
+                .password(encodedPassword)
+                .name("용병")
+                .role(UserRoleEnum.USER)
+                .build();
+
+        opponentLeader = User.builder()
+                .email("opponent@test.com")
+                .password(encodedPassword)
+                .name("상대리더")
+                .role(UserRoleEnum.USER)
+                .build();
+
         userRepository.save(hostLeader);
         userRepository.save(mercenary);
         userRepository.save(opponentLeader);
 
-        hostTeam = Team.builder().leader(hostLeader).name("호스트팀").build();
-        opponentTeam = Team.builder().leader(opponentLeader).name("상대팀").build();
+        // 2. Teams 생성
+        hostTeam = Team.builder()
+                .leader(hostLeader)
+                .name("호스트팀")
+                .build();
 
-        TeamMember hostTeamMember = TeamMember.builder().user(hostLeader).team(hostTeam).build();
-        hostTeam.addTeamMember(hostTeamMember);
+        opponentTeam = Team.builder()
+                .leader(opponentLeader)
+                .name("상대팀")
+                .build();
+
         teamRepository.save(hostTeam);
-
-        TeamMember opponentTeamMember = TeamMember.builder().user(opponentLeader).team(opponentTeam).build();
-        opponentTeam.addTeamMember(opponentTeamMember);
         teamRepository.save(opponentTeam);
-        
+
+        // 3. TeamMembers 생성
+        TeamMember hostTeamMember = TeamMember.builder()
+                .user(hostLeader)
+                .team(hostTeam)
+                .build();
+        teamMemberRepository.save(hostTeamMember);
+
+        TeamMember opponentTeamMember = TeamMember.builder()
+                .user(opponentLeader)
+                .team(opponentTeam)
+                .build();
+        teamMemberRepository.save(opponentTeamMember);
+
+        // 4. Match 생성
         completedMatch = Match.builder()
-                .hostTeam(hostTeam).title("테스트 경기").matchDate(LocalDateTime.now().minusDays(1))
-                .locationName("테스트 경기장").latitude(0.0).longitude(0.0)
-                .matchType(MatchType.FUTSAL_6V6).maxMemberCount(12).status(MatchStatus.RECRUITING)
+                .hostTeam(hostTeam)
+                .title("테스트 경기")
+                .matchDate(LocalDateTime.now().minusDays(1))
+                .locationName("테스트 경기장")
+                .latitude(0.0)
+                .longitude(0.0)
+                .matchType(MatchType.FUTSAL_6V6)
+                .venueType("INDOOR")  // 추가!
+                .maxMemberCount(12)
+                .status(MatchStatus.RECRUITING)
                 .build();
         completedMatch.updateStatus(MatchStatus.COMPLETED);
         matchRepository.save(completedMatch);
 
-        MatchApplication application = MatchApplication.builder().match(completedMatch).user(mercenary).build();
-        application.updateStatus(ApplicationStatus.ACCEPTED);
+        // 5. MatchApplication 생성
+        MatchApplication application = MatchApplication.builder()
+                .match(completedMatch)
+                .user(mercenary)
+                .build();
+        application.updateStatus(ApplicationStatus.ACCEPTED);  // PENDING → ACCEPTED
         matchApplicationRepository.save(application);
+
+        // EntityManager flush
+        if (entityManager != null) {
+            entityManager.flush();
+            entityManager.clear();
+        }
     }
+
+
 
     @Test
     @DisplayName("리뷰 작성 성공")
@@ -162,6 +222,7 @@ class ReviewControllerTest {
 
     @Test
     @DisplayName("팀 리뷰 목록 조회 성공")
+    @WithMockUser(username = "test@test.com", roles = "USER")  // 추가!
     void getReviewsForTeam_Success() throws Exception {
         // given
         Review review = Review.builder()
@@ -173,6 +234,12 @@ class ReviewControllerTest {
                 .build();
         reviewRepository.save(review);
 
+        // EntityManager flush 추가
+        if (entityManager != null) {
+            entityManager.flush();
+            entityManager.clear();
+        }
+
         // when & then
         mockMvc.perform(get("/api/reviews/teams/" + hostTeam.getId()))
                 .andExpect(status().isOk())
@@ -183,6 +250,7 @@ class ReviewControllerTest {
 
     @Test
     @DisplayName("사용자 관련 리뷰 목록 조회 성공")
+    @WithMockUser(username = "test@test.com", roles = "USER")  // 추가!
     void getReviewsForUser_Success() throws Exception {
         // given
         Review review = Review.builder()
@@ -193,6 +261,11 @@ class ReviewControllerTest {
                 .comment("매너가 좋은 팀입니다!")
                 .build();
         reviewRepository.save(review);
+        // EntityManager flush 추가
+        if (entityManager != null) {
+            entityManager.flush();
+            entityManager.clear();
+        }
 
         // when & then
         // The user 'hostLeader' is a member of 'hostTeam', so this should return the review about 'hostTeam'.

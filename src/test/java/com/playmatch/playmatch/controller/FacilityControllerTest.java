@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,11 +18,13 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.playmatch.playmatch.BaseTest;
+
 @ActiveProfiles("test")
 @SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
-class FacilityControllerTest {
+class FacilityControllerTest extends BaseTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -33,7 +36,6 @@ class FacilityControllerTest {
 
     @BeforeEach
     void setUp() {
-        facilityRepository.deleteAll();
         testFacility = Facility.builder()
                 .name("플레이매치 구장")
                 .address("서울시 강남구")
@@ -42,12 +44,17 @@ class FacilityControllerTest {
                 .imageUrl("http://example.com/image.jpg")
                 .build();
         facilityRepository.save(testFacility);
+
+        if (entityManager != null) {
+            entityManager.flush();
+            entityManager.clear();
+        }
     }
 
     @Test
     @DisplayName("구장 프로필 조회 성공")
+    @WithMockUser(username = "test@test.com", roles = "USER")  // 추가!
     void getFacility_Success() throws Exception {
-        // when & then
         mockMvc.perform(get("/api/facilities/" + testFacility.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("플레이매치 구장"))

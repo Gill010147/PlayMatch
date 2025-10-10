@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 public class ChatMessageResponseDto {
 
     private final Long messageId;
+    private final Long roomId; // 추가
     private final Integer senderId;
     private final String senderName;
     private final String message;
@@ -16,6 +17,7 @@ public class ChatMessageResponseDto {
 
     public ChatMessageResponseDto(ChatMessage chatMessage) {
         this.messageId = chatMessage.getId();
+        this.roomId = chatMessage.getChatRoom().getId(); // 추가
         this.senderId = chatMessage.getSender().getId();
         this.senderName = chatMessage.getSender().getName();
         this.message = chatMessage.getMessage();

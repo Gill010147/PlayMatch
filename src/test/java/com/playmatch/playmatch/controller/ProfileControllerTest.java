@@ -1,6 +1,7 @@
 package com.playmatch.playmatch.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.playmatch.playmatch.BaseTest;
 import com.playmatch.playmatch.domain.User;
 import com.playmatch.playmatch.domain.UserRoleEnum;
 import com.playmatch.playmatch.dto.ProfileRequestDto;
@@ -29,7 +30,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
-class ProfileControllerTest {
+class ProfileControllerTest extends BaseTest {  // BaseTest 상속 추가!
 
     @Autowired
     private MockMvc mockMvc;
@@ -45,7 +46,7 @@ class ProfileControllerTest {
 
     @BeforeEach
     void setUp() {
-        userRepository.deleteAll();
+        // deleteAll() 제거 - @Transactional이 자동으로 롤백
         String encodedPassword = passwordEncoder.encode("password");
         user1 = User.builder()
                 .email("user1@test.com")
@@ -54,8 +55,8 @@ class ProfileControllerTest {
                 .area("서울")
                 .age("20대")
                 .gender("남성")
-                .playStyle("매너")
-                .position("공격수")
+                .playStyles(java.util.List.of("매너"))
+                .positions(java.util.List.of("공격수"))
                 .role(UserRoleEnum.USER)
                 .build();
 
@@ -66,13 +67,19 @@ class ProfileControllerTest {
                 .area("부산")
                 .age("30대")
                 .gender("여성")
-                .playStyle("열정")
-                .position("수비수")
+                .playStyles(java.util.List.of("열정"))
+                .positions(java.util.List.of("수비수"))
                 .role(UserRoleEnum.USER)
                 .build();
 
         userRepository.save(user1);
         userRepository.save(user2);
+
+        // EntityManager flush
+        if (entityManager != null) {
+            entityManager.flush();
+            entityManager.clear();
+        }
     }
 
     @Test
@@ -96,13 +103,13 @@ class ProfileControllerTest {
         requestDto.setArea("경기");
         requestDto.setAge("20대");
         requestDto.setGender("남성");
-        requestDto.setPlayStyle("테크니션");
-        requestDto.setPosition("미드필더");
+        requestDto.setPlayStyles(java.util.List.of("테크니션"));
+        requestDto.setPositions(java.util.List.of("미드필더"));
 
         String requestBody = objectMapper.writeValueAsString(requestDto);
 
         // when & then
-        mockMvc.perform(put("/api/profiles/me") // Changed URL
+        mockMvc.perform(put("/api/profiles/me")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody))
                 .andExpect(status().isOk())
@@ -112,14 +119,13 @@ class ProfileControllerTest {
         User updatedUser = userRepository.findByEmail("user1@test.com").orElseThrow();
         assertEquals("수정된유저1", updatedUser.getName());
         assertEquals("경기", updatedUser.getArea());
-        assertEquals("미드필더", updatedUser.getPosition());
+        assertEquals(java.util.List.of("미드필더"), updatedUser.getPositions());
     }
 
     @Test
     @DisplayName("다른 사용자 프로필 조회 성공")
     @WithMockUser(username = "user1@test.com", roles = "USER")
     void getUserProfile_Success() throws Exception {
-        // when & then
         mockMvc.perform(get("/api/profiles/users/" + user2.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.email").value("user2@test.com"))

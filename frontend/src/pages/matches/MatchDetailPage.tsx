@@ -51,8 +51,8 @@ export default function MatchDetailPage() {
   return (
     <div style={{ maxWidth: 720, margin: "24px auto", padding: "0 16px", display: "grid", gap: 12 }}>
       <h2>경기 상세</h2>
-      <div><strong>{data.type}</strong> • {data.teams}</div>
-      <div style={{ color: "#666" }}>{data.time} • {data.location}</div>
+      <div><strong>{data.title}</strong></div>
+      <div style={{ color: "#666" }}>{new Date(data.matchDate).toLocaleString()} • {data.locationName}</div>
       {data.description && <p>{data.description}</p>}
       <div>
         <button onClick={handleApply} disabled={applyLoading || data.status !== "open"}>

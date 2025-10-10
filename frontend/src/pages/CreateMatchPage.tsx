@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import logo from "../logo.png";
 import { useNavigate } from "react-router-dom";
 import { MatchesService } from "../services/api";
@@ -13,42 +13,62 @@ declare global {
 export default function CreateMatchPage() {
   const navigate = useNavigate();
   const { fetchMatches } = useMatches();
+
+  // Form State
   const [title, setTitle] = useState("");
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
-  const [location, setLocation] = useState("");
-  const [duration, setDuration] = useState<string>("60");
-  const [type, setType] = useState("실내");
-  const [teamFormat, setTeamFormat] = useState("5vs5");
+  const [locationName, setLocationName] = useState("");
+  const [description, setDescription] = useState("");
+  const [matchType, setMatchType] = useState("FUTSAL_5V5");
+  const [venueType, setVenueType] = useState("INDOOR");
+  const [maxMemberCount, setMaxMemberCount] = useState(10);
+
   const [saving, setSaving] = useState(false);
+
+  // '경기 종류'가 변경될 때 '최대 인원 수' 자동 업데이트
+  useEffect(() => {
+    let count = 10;
+    if (matchType === 'FUTSAL_6V6') {
+      count = 12;
+    } else if (matchType === 'SOCCER_11V11') {
+      count = 22;
+    }
+    setMaxMemberCount(count);
+  }, [matchType]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (saving) return;
+
+    if (!title || !date || !time || !locationName || !maxMemberCount) {
+      alert("필수 항목을 모두 입력해주세요.");
+      return;
+    }
+
     try {
       setSaving(true);
-      // 간단 검증
-      if (!title || !date || !time || !location) {
-        alert("필수 항목을 모두 입력해주세요.");
-        return;
-      }
-      const teams = `남녀모두 - ${teamFormat}`;
-      const datetime = `${date} ${time}`;
-      await MatchesService.create({
-        time: datetime,
-        location,
-        type,
-        teams,
-        status: "open",
+
+      const payload = {
         title,
-        date,
-        duration,
-      });
+        description,
+        hostTeamId: 1, // 임시 하드코딩
+        matchDate: `${date}T${time}:00`,
+        locationName,
+        latitude: 37.5665,  // 임시 하드코딩 (서울 시청)
+        longitude: 126.9780, // 임시 하드코딩 (서울 시청)
+        matchType,
+        venueType,
+        maxMemberCount,
+      };
+
+      await MatchesService.create(payload);
+
       alert("경기가 생성되었습니다.");
-      fetchMatches(); // Call fetchMatches to refresh the list
+      fetchMatches();
       navigate("/");
     } catch (err: any) {
-      console.error(err);
+      console.error("경기 생성 실패:", err);
       const msg = err?.message || (typeof err === "string" ? err : JSON.stringify(err));
       alert(`경기 생성 중 오류가 발생했습니다.\n${msg}`);
     } finally {
@@ -64,7 +84,7 @@ export default function CreateMatchPage() {
     new window.daum.Postcode({
       oncomplete: (data: any) => {
         const addr = data.roadAddress || data.jibunAddress || data.address || "";
-        if (addr) setLocation(addr);
+        if (addr) setLocationName(addr);
       },
     }).open();
   };
@@ -124,26 +144,12 @@ export default function CreateMatchPage() {
             </label>
           </div>
 
-          <label style={{ display: "grid", gap: 6 }}>
-            <span>진행 시간(분)</span>
-            <input
-              type="number"
-              min={10}
-              step={10}
-              value={duration}
-              onChange={(e) => setDuration(e.target.value)}
-              placeholder="예: 60"
-              style={{ padding: 10, borderRadius: 8, border: "1px solid #ddd" }}
-              required
-            />
-          </label>
-
           <div style={{ display: "grid", gap: 6 }}>
             <span>장소 (주소 검색)</span>
             <div style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: 8 }}>
               <input
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
+                value={locationName}
+                onChange={(e) => setLocationName(e.target.value)}
                 placeholder="주소를 검색하세요"
                 style={{ padding: 10, borderRadius: 8, border: "1px solid #ddd" }}
                 required
@@ -154,30 +160,53 @@ export default function CreateMatchPage() {
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
             <label style={{ display: "grid", gap: 6 }}>
-              <span>유형</span>
+              <span>경기 종류</span>
               <select
-                value={type}
-                onChange={(e) => setType(e.target.value)}
+                value={matchType}
+                onChange={(e) => setMatchType(e.target.value)}
                 style={{ padding: 10, borderRadius: 8, border: "1px solid #ddd" }}
               >
-                <option value="실내">실내</option>
-                <option value="야외">야외</option>
+                <option value="FUTSAL_5V5">풋살 5vs5</option>
+                <option value="FUTSAL_6V6">풋살 6vs6</option>
+                <option value="SOCCER_11V11">축구 11vs11</option>
               </select>
             </label>
-
             <label style={{ display: "grid", gap: 6 }}>
-              <span>팀 구성</span>
+              <span>장소 유형</span>
               <select
-                value={teamFormat}
-                onChange={(e) => setTeamFormat(e.target.value)}
+                value={venueType}
+                onChange={(e) => setVenueType(e.target.value)}
                 style={{ padding: 10, borderRadius: 8, border: "1px solid #ddd" }}
               >
-                <option value="5vs5">5vs5</option>
-                <option value="6vs6">6vs6</option>
-                <option value="7vs7">7vs7</option>
+                <option value="INDOOR">실내</option>
+                <option value="OUTDOOR">야외</option>
               </select>
             </label>
           </div>
+
+          <label style={{ display: "grid", gap: 6 }}>
+            <span>최대 인원 수</span>
+            <input
+              type="number"
+              min={2}
+              step={1}
+              value={maxMemberCount}
+              onChange={(e) => setMaxMemberCount(Number(e.target.value))}
+              style={{ padding: 10, borderRadius: 8, border: "1px solid #ddd" }}
+              required
+            />
+          </label>
+
+          <label style={{ display: "grid", gap: 6 }}>
+            <span>설명</span>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="경기 관련 추가 정보를 입력하세요. (예: 실력, 준비물 등)"
+              rows={4}
+              style={{ padding: 10, borderRadius: 8, border: "1px solid #ddd", resize: "vertical" }}
+            />
+          </label>
 
           <button
             type="submit"
@@ -200,5 +229,3 @@ export default function CreateMatchPage() {
     </>
   );
 }
-
-

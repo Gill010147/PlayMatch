@@ -27,11 +27,13 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import com.playmatch.playmatch.BaseTest;
+
 @ActiveProfiles("test")
 @SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
-class MatchControllerTest {
+class MatchControllerTest extends BaseTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -44,7 +46,7 @@ class MatchControllerTest {
     @Autowired
     private TeamRepository teamRepository;
     @Autowired
-    private TeamMemberRepository teamMemberRepository; // Added this
+    private TeamMemberRepository teamMemberRepository;
     @Autowired
     private MatchRepository matchRepository;
     @Autowired
@@ -58,18 +60,40 @@ class MatchControllerTest {
     @BeforeEach
     void setUp() {
         String encodedPassword = passwordEncoder.encode("password");
-        hostLeader = User.builder().email("host@test.com").password(encodedPassword).name("호스트리더").role(UserRoleEnum.USER).build();
-        applicantUser = User.builder().email("applicant@test.com").password(encodedPassword).name("지원자").role(UserRoleEnum.USER).build();
+
+        // 1. User 먼저 생성 (FK 참조 대상)
+        hostLeader = User.builder()
+                .email("host@test.com")
+                .password(encodedPassword)
+                .name("호스트리더")
+                .role(UserRoleEnum.USER)
+                .build();
+
+        applicantUser = User.builder()
+                .email("applicant@test.com")
+                .password(encodedPassword)
+                .name("지원자")
+                .role(UserRoleEnum.USER)
+                .build();
+
         userRepository.save(hostLeader);
         userRepository.save(applicantUser);
 
-        hostTeam = Team.builder().leader(hostLeader).name("호스트팀").build();
+        // 2. Team 생성
+        hostTeam = Team.builder()
+                .leader(hostLeader)
+                .name("호스트팀")
+                .build();
         teamRepository.save(hostTeam);
 
-        // Explicitly add leader as a team member
-        TeamMember hostTeamMember = TeamMember.builder().user(hostLeader).team(hostTeam).build();
+        // 3. TeamMember 생성
+        TeamMember hostTeamMember = TeamMember.builder()
+                .user(hostLeader)
+                .team(hostTeam)
+                .build();
         teamMemberRepository.save(hostTeamMember);
 
+        // 4. Match 생성 (모든 의존성이 준비된 후)
         match = Match.builder()
                 .hostTeam(hostTeam)
                 .title("테스트 경기")
@@ -78,13 +102,19 @@ class MatchControllerTest {
                 .latitude(37.5665)
                 .longitude(126.9780)
                 .matchType(MatchType.FUTSAL_6V6)
+                .venueType("INDOOR") // 추가!
                 .maxMemberCount(12)
                 .status(MatchStatus.RECRUITING)
                 .build();
         matchRepository.save(match);
+
+        // EntityManager flush로 즉시 DB 반영
+        if (entityManager != null) {
+            entityManager.flush();
+            entityManager.clear();
+        }
     }
 
-    // ... (rest of the test methods are the same)
     @Test
     @DisplayName("경기 생성 성공")
     @WithMockUser(username = "host@test.com", roles = "USER")
@@ -93,6 +123,7 @@ class MatchControllerTest {
         requestDto.setTitle("새로운 경기");
         requestDto.setHostTeamId(hostTeam.getId());
         requestDto.setMatchType(MatchType.FUTSAL_6V6);
+        requestDto.setVenueType("INDOOR");  // 추가!
         requestDto.setLocationName("테스트 경기장");
         requestDto.setLatitude(37.5665);
         requestDto.setLongitude(126.9780);
@@ -120,6 +151,7 @@ class MatchControllerTest {
 
     @Test
     @DisplayName("경기 상세 조회 성공")
+    @WithMockUser(username = "host@test.com", roles = "USER")  // 이 줄 추가!
     void getMatchDetails_Success() throws Exception {
         mockMvc.perform(get("/api/matches/" + match.getId()))
                 .andExpect(status().isOk())
@@ -148,7 +180,10 @@ class MatchControllerTest {
     @DisplayName("경기 지원자 목록 조회 성공")
     @WithMockUser(username = "host@test.com", roles = "USER")
     void getApplicationsForMatch_Success() throws Exception {
-        MatchApplication application = MatchApplication.builder().match(match).user(applicantUser).build();
+        MatchApplication application = MatchApplication.builder()
+                .match(match)
+                .user(applicantUser)
+                .build();
         matchApplicationRepository.save(application);
 
         mockMvc.perform(get("/api/matches/" + match.getId() + "/participants"))
@@ -161,7 +196,10 @@ class MatchControllerTest {
     @DisplayName("경기 지원 상태 변경 성공")
     @WithMockUser(username = "host@test.com", roles = "USER")
     void updateMatchApplicationStatus_Success() throws Exception {
-        MatchApplication application = MatchApplication.builder().match(match).user(applicantUser).build();
+        MatchApplication application = MatchApplication.builder()
+                .match(match)
+                .user(applicantUser)
+                .build();
         matchApplicationRepository.save(application);
 
         UpdateApplicationStatusRequestDto requestDto = new UpdateApplicationStatusRequestDto();
