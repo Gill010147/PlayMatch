@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import logo from "../logo.png";
 import { useNavigate } from "react-router-dom";
-import { MatchesService } from "../services/api";
+import { MatchesService, TeamsService } from "../services/api";
 import { useMatches } from '../contexts/MatchesContext';
+import type { Team } from "../types/domain";
 
 declare global {
   interface Window {
@@ -13,6 +14,10 @@ declare global {
 export default function CreateMatchPage() {
   const navigate = useNavigate();
   const { fetchMatches } = useMatches();
+
+  // Team State
+  const [hostTeamId, setHostTeamId] = useState<number | null>(null);
+  const [teamsLoaded, setTeamsLoaded] = useState(false);
 
   // Form State
   const [title, setTitle] = useState("");
@@ -25,6 +30,26 @@ export default function CreateMatchPage() {
   const [maxMemberCount, setMaxMemberCount] = useState(10);
 
   const [saving, setSaving] = useState(false);
+
+  // Fetch user's team
+  useEffect(() => {
+    const fetchMyTeam = async () => {
+      try {
+        const myTeams: Team[] = await TeamsService.myTeams();
+        if (myTeams && myTeams.length > 0) {
+          // Assume the user uses their first team to create a match
+          setHostTeamId(myTeams[0].id);
+        }
+      } catch (error) {
+        console.error("팀 정보를 가져오는데 실패했습니다:", error);
+      } finally {
+        setTeamsLoaded(true);
+      }
+    };
+
+    fetchMyTeam();
+  }, []);
+
 
   // '경기 종류'가 변경될 때 '최대 인원 수' 자동 업데이트
   useEffect(() => {
@@ -41,6 +66,11 @@ export default function CreateMatchPage() {
     e.preventDefault();
     if (saving) return;
 
+    if (!hostTeamId) {
+      alert("경기를 생성하려면 먼저 팀에 소속되어 있어야 합니다.");
+      return;
+    }
+
     if (!title || !date || !time || !locationName || !maxMemberCount) {
       alert("필수 항목을 모두 입력해주세요.");
       return;
@@ -52,7 +82,7 @@ export default function CreateMatchPage() {
       const payload = {
         title,
         description,
-        hostTeamId: 1, // 임시 하드코딩
+        hostTeamId, // Use the fetched team ID
         matchDate: `${date}T${time}:00`,
         locationName,
         latitude: 37.5665,  // 임시 하드코딩 (서울 시청)
@@ -89,6 +119,76 @@ export default function CreateMatchPage() {
     }).open();
   };
 
+  // Render a loading state or disabled form while checking for a team
+  if (!teamsLoaded) {
+    return (
+      <>
+        <header
+          style={{
+            position: "relative",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            marginTop: "30px",
+          }}
+        >
+          <img
+            src={logo}
+            alt="Play Match Logo"
+            style={{ height: "72px", cursor: "pointer" }}
+            onClick={() => navigate("/")}
+          />
+        </header>
+        <div style={{ maxWidth: 720, margin: "24px auto", padding: "0 16px", textAlign: "center" }}>
+            <h2 style={{ marginBottom: 16 }}>경기 생성</h2>
+            <p>사용자 팀 정보를 불러오는 중입니다...</p>
+        </div>
+      </>
+    );
+  }
+
+  if (!hostTeamId) {
+    return (
+      <>
+        <header
+          style={{
+            position: "relative",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            marginTop: "30px",
+          }}
+        >
+          <img
+            src={logo}
+            alt="Play Match Logo"
+            style={{ height: "72px", cursor: "pointer" }}
+            onClick={() => navigate("/")}
+          />
+        </header>
+        <div style={{ maxWidth: 720, margin: "24px auto", padding: "0 16px", textAlign: "center" }}>
+            <h2 style={{ marginBottom: 16 }}>경기 생성 불가</h2>
+            <p style={{ marginBottom: 24 }}>경기를 생성하려면 먼저 팀을 생성하거나 팀에 가입해야 합니다.</p>
+            <button 
+              onClick={() => navigate('/profiles/teams/create')} 
+              style={{
+                padding: "12px 18px",
+                backgroundColor: "#16a34a",
+                color: "#fff",
+                border: "none",
+                borderRadius: 10,
+                cursor: "pointer",
+                fontWeight: 600,
+              }}
+            >
+              팀 생성하기
+            </button>
+        </div>
+      </>
+    );
+  }
+
+
   return (
     <>
       <header
@@ -110,6 +210,7 @@ export default function CreateMatchPage() {
       <div style={{ maxWidth: 720, margin: "24px auto", padding: "0 16px" }}>
         <h2 style={{ marginBottom: 16 }}>경기 생성</h2>
         <form onSubmit={handleSubmit} style={{ display: "grid", gap: 12 }}>
+          {/* Form fields remain the same */}
           <label style={{ display: "grid", gap: 6 }}>
             <span>제목</span>
             <input

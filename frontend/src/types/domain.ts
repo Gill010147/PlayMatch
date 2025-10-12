@@ -73,6 +73,16 @@ export interface ProfileRequestDto {
   phone?: string;
 }
 
+export interface Team {
+  id: number;
+  name: string;
+  introduce: string;
+  mainArea: string;
+  teamLogo: string | null;
+  leaderName: string;
+  members: any[];
+}
+
 
 
 

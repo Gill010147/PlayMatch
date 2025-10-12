@@ -354,6 +354,9 @@ export const TeamsService = {
   detail: async (teamId: string) =>
     apiRequest({ method: "GET", path: `/api/teams/${teamId}` }),
 
+  // 내 팀 목록 조회
+  myTeams: async () => apiRequest({ method: "GET", path: "/api/teams/my" }),
+
   // 팀 정보 수정
   update: async (teamId: string, payload: any) =>
     apiRequest({ method: "PUT", path: `/api/teams/${teamId}`, body: payload }),
