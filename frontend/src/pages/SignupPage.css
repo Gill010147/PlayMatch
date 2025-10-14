@@ -143,4 +143,93 @@
     transform: translateY(-2px);
 }
 
+/* Modal styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7); /* 어둡게 할 필요가 있다면 주석 해제 후 투명도 조절 */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: #fff; /* 이미지가 덮이므로 흰색 배경 제거 */
+  background-image: url('stadium.jpg'); /* 고객님의 이미지 경로 */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+  max-width: 450px;
+  width: 90%;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.modal-content h3 {
+  margin-top: 0;
+  color: #fff; /* 글씨 색상 흰색으로 변경 */
+  margin-bottom: 20px;
+  text-align: center;
+  font-size: 1.6em;
+  font-weight: 700;
+}
+
+.modal-content p {
+  margin: 0;
+  color: #fff; /* 글씨 색상 흰색으로 변경 */
+  font-size: 1.05em;
+  line-height: 1.5;
+}
+
+.modal-content p span {
+  font-weight: 600;
+  color: #fff; /* 글씨 색상 흰색으로 변경 */
+  margin-right: 8px;
+}
+
+.modal-content .button-group {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px; /* 버튼 사이 간격 추가 */
+  margin-top: 20px;
+}
+
+.modal-content .button-group button {
+  flex: 1;
+  padding: 12px 18px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 16px;
+  transition: background-color 0.2s ease;
+}
+
+.modal-content .button-group button:first-child {
+  background-color: #e0e0e0; /* 닫기 버튼 색상 */
+  color: #333;
+}
+
+.modal-content .button-group button:first-child:hover {
+  background-color: #d0d0d0;
+}
+
+.modal-content .button-group button:last-child {
+  background-color: rgba(70, 55, 238, 1); /* 다음 버튼 색상 */
+  color: #fff;
+}
+
+.modal-content .button-group button:last-child:hover {
+  background-color: rgba(55, 40, 200, 1);
+}
+
 

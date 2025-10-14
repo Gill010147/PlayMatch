@@ -4,9 +4,8 @@ spring:
   datasource:
     url: jdbc:postgresql://localhost:5434/playmatch_test
     username: playmatch_user
-    password: ghkdqudrlf69150@@
+    password: "ghkdqudrlf69150@@"
     driver-class-name: org.postgresql.Driver
-
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
@@ -19,16 +18,13 @@ spring:
         hbm2ddl:
           auto: create
     open-in-view: false
-
   sql:
     init:
       mode: always
-
   data:
     redis:
       host: localhost
       port: 6370
-
   main:
     allow-bean-definition-overriding: true
 
@@ -47,3 +43,6 @@ logging:
     org.hibernate.type.descriptor.sql.BasicBinder: TRACE
     org.springframework.test.context: DEBUG
     org.hibernate.tool.schema: DEBUG
+
+server:
+  port: 8081

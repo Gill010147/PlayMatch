@@ -63,6 +63,7 @@ public class SecurityConfig {
                 authorizeHttprequests
                         .requestMatchers("/api/auth/**").permitAll() // 인증 관련 경로는 모두 허용
                         .requestMatchers(HttpMethod.GET, "/api/matches", "/api/matches/**").permitAll() // ** 추가
+                        .requestMatchers(HttpMethod.GET, "/api/video-feedbacks", "/api/video-feedbacks/**").permitAll() // 영상 피드백 목록 및 상세 조회 허용
                         .requestMatchers(HttpMethod.GET, "/api/matches").permitAll() // 경기 목록 조회는 인증 없이 허용
                         .requestMatchers("/ws-stomp/**").permitAll() // WebSocket 연결 경로 허용
                         .requestMatchers("/chat.html").permitAll() // 채팅 테스트 페이지 허용

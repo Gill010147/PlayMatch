@@ -229,7 +229,7 @@ const RecommendationsServiceMock = {
   },
 };
 
-export const RecommendationsService = useMocks ? RecommendationsServiceMock : RecommendationsServiceHttp;
+export const RecommendationsService = RecommendationsServiceHttp;
 
 export const ChatService = {
   // 내 채팅방 목록 조회
@@ -270,47 +270,42 @@ export const ReviewsService = {
     apiRequest({ method: "GET", path: `/api/reviews/teams/${teamId}` }),
 };
 
-const VIDEO_FEEDBACK_STORAGE_KEY = "playmatch.videoFeedbacks";
-
 export const VideoFeedbackService = {
-  _readAll(): any[] {
-    try {
-      const raw = localStorage.getItem(VIDEO_FEEDBACK_STORAGE_KEY);
-      if (!raw) return [];
-      const parsed = JSON.parse(raw);
-      return Array.isArray(parsed) ? parsed : [];
-    } catch {
-      return [];
-    }
-  },
-  _writeAll(list: any[]) {
-    localStorage.setItem(VIDEO_FEEDBACK_STORAGE_KEY, JSON.stringify(list));
-  },
   list: async () => {
-    return VideoFeedbackService._readAll();
+    return apiRequest({ method: "GET", path: "/api/video-feedbacks" });
   },
   detail: async (videoId: string) => {
-    const list = VideoFeedbackService._readAll();
-    return (list.find((f) => f.id === videoId) || null) as any;
+    return apiRequest({ method: "GET", path: `/api/video-feedbacks/${videoId}` });
   },
   addComment: async (videoId: string, commentText: string) => {
     console.log(`Adding comment to video ${videoId}: ${commentText}`);
     return { success: true };
   },
   uploadVideoFeedback: async (payload: { title: string; description: string; videoFile: File }) => {
-    const list = VideoFeedbackService._readAll();
-    const newId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-    const newFeedback = {
-      id: newId,
-      title: payload.title,
-      description: payload.description,
-      videoUrl: URL.createObjectURL(payload.videoFile),
-      uploadDate: new Date().toISOString().split('T')[0],
-      commentsCount: 0,
-    };
-    list.unshift(newFeedback); // Add to the beginning
-    VideoFeedbackService._writeAll(list);
-    return newFeedback;
+    const formData = new FormData();
+    formData.append('videoFile', payload.videoFile);
+    formData.append('title', payload.title);
+    formData.append('description', payload.description);
+
+    const token = localStorage.getItem("token");
+    const res = await fetch(`${import.meta.env.VITE_API_BASE_URL || ''}/api/video-feedbacks`, {
+      method: "POST",
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      body: formData,
+    });
+
+    if (!res.ok) {
+      const message = (await res.text()) || "영상 업로드 실패";
+      throw new ApiError(message, res.status);
+    }
+
+    const contentType = res.headers.get("content-type") || "";
+    if (contentType.includes("application/json")) {
+      return await res.json();
+    } else if (contentType.includes("text/plain")) {
+      return await res.text();
+    }
+    return undefined;
   },
 };
 

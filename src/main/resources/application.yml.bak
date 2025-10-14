@@ -1,0 +1,47 @@
+﻿# --- Default (怨듯넻 ?ㅼ젙) ---
+# ?ш린???꾨줈?꾩쓣 吏?뺥븯吏 ?딆븯????湲곕낯?쇰줈 ?ъ슜???ㅼ젙???ｌ뒿?덈떎.
+spring:
+  # 湲곕낯 ?꾨줈?꾩쓣 'local'濡??ㅼ젙?⑸땲??
+  # ?대젃寃??섎㈃ IDE?먯꽌 洹몃깷 ?ㅽ뻾?덉쓣 ???먮룞?쇰줈 local ?ㅼ젙?쇰줈 ?숈옉?⑸땲??
+  profiles:
+    default: local
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+file:
+  upload-dir: ./uploads
+
+# --- 援щ텇??---
+---
+
+# --- Local (??PC?먯꽌 IDE濡?吏곸젒 ?ㅽ뻾???? ---
+spring:
+  config:
+    activate:
+      on-profile: "local" # 'local' ?꾨줈???쒖꽦???????ㅼ젙 ?ъ슜
+  datasource:
+    url: jdbc:postgresql://localhost:5434/playmatch_db # ??PC??Docker DB 二쇱냼
+    username: playmatch
+    password: ghkdqudrlf69150@@
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update # ?ㅽ뻾 ?쒖젏??DB ?뚯씠釉붿쓣 ?뷀떚?곗뿉 留욊쾶 ?낅뜲?댄듃
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect # Dialect 紐낆떆???ㅼ젙
+  data:
+    redis:
+      host: localhost # ??PC??Docker Redis 二쇱냼
+      port: 6379
+
+jwt:
+  secret:
+    key: c3ByaW5nLWJvb3Qtc2VjdXJpdHktand0LXR1dG9yaWFsLWppd3QtdHV0b3JpYWwtc3ByaW5nLWJvb3Qtc2VjdXJpdHkK
+  token:
+    expiration-time: 3600000 # 1?쒓컙 (諛由ъ큹 ?⑥쐞)
+# --- 援щ텇??---
+

@@ -128,10 +128,10 @@ export default function VideoFeedbackDetailPage() {
           </button>
         </div>
         <div style={{ display: "grid", gap: "12px" }}>
-          {videoFeedback.comments.length === 0 ? (
+          {(videoFeedback.comments || []).length === 0 ? (
             <p style={{ color: "#999", textAlign: "center" }}>아직 댓글이 없습니다.</p>
           ) : (
-            videoFeedback.comments.map((comment) => (
+            (videoFeedback.comments || []).map((comment) => (
               <div key={comment.id} style={{ backgroundColor: "#f0f0f0", padding: "12px", borderRadius: "8px" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "4px" }}>
                   <span style={{ fontWeight: "bold", color: "#333" }}>{comment.author}</span>
