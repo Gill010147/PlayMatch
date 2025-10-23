@@ -24,6 +24,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import org.springframework.mock.web.MockMultipartFile;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -104,7 +107,6 @@ class TeamControllerTest extends BaseTest {
 
     @Test
     @DisplayName("팀 생성 성공")
-    @Disabled("비즈니스 로직 검증 필요")
     void createTeam_Success() throws Exception {
         TeamRequestDto requestDto = new TeamRequestDto();
         requestDto.setName("FC 테스트");
@@ -112,10 +114,9 @@ class TeamControllerTest extends BaseTest {
         requestDto.setMainArea("서울");
         String requestBody = objectMapper.writeValueAsString(requestDto);
 
-        mockMvc.perform(post("/api/teams")
-                        .with(user(anotherUser.getEmail()).roles("USER"))  // 변경!
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(requestBody))
+        mockMvc.perform(multipart("/api/teams")
+                        .file(new MockMultipartFile("requestDto", "", MediaType.APPLICATION_JSON_VALUE, requestBody.getBytes()))
+                        .with(user(anotherUser.getEmail()).roles("USER")))
                 .andDo(print())  // 추가 - 에러 메시지 확인
                 .andExpect(status().isCreated())
                 .andExpect(content().string("팀 생성 완료"));

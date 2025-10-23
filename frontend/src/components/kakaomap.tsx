@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import './kakaomap.css';
 
 // 백엔드의 MatchResponseDto와 일치하는 인터페이스
@@ -27,13 +27,36 @@ export default function KakaoMap({ matches }: KakaoMapProps) {
   const mapRef = useRef<any>(null);
   const markersRef = useRef<any[]>([]);
   const infoWindowsRef = useRef<any[]>([]);
+  const [kakaoLoaded, setKakaoLoaded] = useState(false); // State to track Kakao API loading
 
+  // Effect to check if Kakao API is loaded and set kakaoLoaded state
   useEffect(() => {
-    const { kakao } = window;
-    if (!kakao) {
-      console.error("Kakao API가 로드되지 않았습니다.");
+    // Check if kakao object is already available globally
+    if (window.kakao && window.kakao.maps) {
+      setKakaoLoaded(true);
+    } else {
+      // If not, set up an interval to continuously check for the kakao object
+      // This assumes the script is already in index.html
+      const checkKakaoInterval = setInterval(() => {
+        if (window.kakao && window.kakao.maps) {
+          setKakaoLoaded(true);
+          clearInterval(checkKakaoInterval); // Clear interval once loaded
+        }
+      }, 100); // Check every 100ms
+
+      // Cleanup function to clear the interval if component unmounts
+      return () => clearInterval(checkKakaoInterval);
+    }
+  }, []); // Empty dependency array means this effect runs once on mount
+
+  // Main effect for map initialization and marker handling
+  useEffect(() => {
+    // Only proceed if Kakao API is confirmed to be loaded
+    if (!kakaoLoaded || !window.kakao || !window.kakao.maps) {
       return;
     }
+
+    const { kakao } = window;
 
     const container = document.getElementById("map");
     if (!container) {
@@ -41,6 +64,7 @@ export default function KakaoMap({ matches }: KakaoMapProps) {
       return;
     }
 
+    // Initialize map only if it hasn't been initialized yet
     if (!mapRef.current) {
       mapRef.current = new kakao.maps.Map(container, {
         center: new kakao.maps.LatLng(37.5665, 126.978), // 서울 기본 좌표
@@ -49,7 +73,7 @@ export default function KakaoMap({ matches }: KakaoMapProps) {
     }
     const map = mapRef.current;
 
-    // 기존 마커/인포윈도우 제거
+    // Clear existing markers and info windows before adding new ones
     if (markersRef.current.length) {
       markersRef.current.forEach((m) => m.setMap(null));
       markersRef.current = [];
@@ -121,7 +145,7 @@ export default function KakaoMap({ matches }: KakaoMapProps) {
     if (!matches.length) {
       map.setLevel(7);
     }
-  }, [matches]);
+  }, [matches, kakaoLoaded]);
 
   const handlePopupClick = () => {
     const matchesParam = encodeURIComponent(JSON.stringify(matches));
