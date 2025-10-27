@@ -14,9 +14,9 @@ public class ChatRoomResponseDto {
     private final String name;
     private final LocalDateTime lastMessageAt;
 
-    public ChatRoomResponseDto(ChatRoom chatRoom, User currentUser) {
+    public ChatRoomResponseDto(ChatRoom chatRoom, User currentUser, LocalDateTime lastMessageAt) {
         this.id = chatRoom.getId();
-        this.lastMessageAt = chatRoom.getCreatedAt(); // 우선 생성 시간으로 초기화
+        this.lastMessageAt = lastMessageAt; // 마지막 메시지 시간으로 설정
 
         if (chatRoom.getName() != null && !chatRoom.getName().isEmpty()) {
             this.name = chatRoom.getName(); // 그룹 채팅방의 경우

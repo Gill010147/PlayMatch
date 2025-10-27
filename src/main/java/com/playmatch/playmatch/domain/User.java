@@ -6,6 +6,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +14,7 @@ import java.util.List;
 @Entity
 @Table(name = "users")
 @Getter
+@Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class User {
 
@@ -56,11 +58,17 @@ public class User {
     @Column(name = "skill", length = 30)
     private List<String> skills = new ArrayList<>();
 
-    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    @Enumerated(value = EnumType.STRING) // Enum 타입을 DB에 STRING으로 저장
     private UserRoleEnum role;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Column
+    private Double latitude;
+
+    @Column
+    private Double longitude;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<TeamMember> teamMemberships = new ArrayList<>();
 
     @Builder
@@ -86,5 +94,6 @@ public class User {
         this.playStyles = requestDto.getPlayStyles();
         this.positions = requestDto.getPositions();
         this.skills = requestDto.getSkills();
+        this.phone = requestDto.getPhone(); // phone 필드 업데이트 추가
     }
 }

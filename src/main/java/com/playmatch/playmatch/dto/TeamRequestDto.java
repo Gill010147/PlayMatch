@@ -1,5 +1,6 @@
 package com.playmatch.playmatch.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties; // 추가
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,6 +16,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@JsonIgnoreProperties(ignoreUnknown = true) // 알 수 없는 필드를 무시하도록 추가
 public class TeamRequestDto {
 
     @NotBlank(message = "팀 이름은 비워둘 수 없습니다.")
@@ -25,4 +27,6 @@ public class TeamRequestDto {
     private String mainArea;
 
     private String teamLogo;
+
+    private Integer maxMembers;
 }

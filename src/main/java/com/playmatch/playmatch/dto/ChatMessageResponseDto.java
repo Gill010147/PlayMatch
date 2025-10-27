@@ -1,11 +1,15 @@
 package com.playmatch.playmatch.dto;
 
 import com.playmatch.playmatch.domain.ChatMessage;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
 @Getter
+@NoArgsConstructor(force = true) // Jackson 역직렬화를 위해 추가
+@AllArgsConstructor // 모든 필드를 포함하는 생성자 추가
 public class ChatMessageResponseDto {
 
     private final Long messageId;

@@ -55,6 +55,7 @@ public class TeamService {
                 .mainArea(requestDto.getMainArea())
                 .teamLogo(logoPath)
                 .leader(user)
+                .maxMembers(requestDto.getMaxMembers()) // maxMembers 설정 추가
                 .build();
         log.info("Team entity created. Attempting to save...");
 
@@ -64,6 +65,7 @@ public class TeamService {
         TeamMember teamMember = TeamMember.builder()
                 .team(team)
                 .user(user)
+                .isLeader(true) // 팀 생성자는 리더로 설정
                 .build();
         log.info("TeamMember entity created. Attempting to save for user ID: {} and team ID: {}", user.getId(), team.getId());
         teamMemberRepository.save(teamMember);
@@ -85,8 +87,10 @@ public class TeamService {
                         .name(team.getName())
                         .introduce(team.getIntroduce())
                         .mainArea(team.getMainArea())
-                        .teamLogo(team.getTeamLogo())
+                        .teamLogo(sanitizeLogoUrl(team.getTeamLogo()))
                         .leaderName(team.getLeader().getName())
+                        .maxMembers(team.getMaxMembers())
+                        .currentMembers(team.getMembers().size())
                         .members(team.getMembers().stream().map(TeamMemberResponseDto::new).collect(Collectors.toList()))
                         .build())
                 .collect(Collectors.toList());
@@ -98,15 +102,15 @@ public class TeamService {
             () -> new IllegalArgumentException("해당 ID의 팀을 찾을 수 없습니다: " + teamId)
         );
 
-        System.out.println("Debug: Leader name in service: " + team.getLeader().getName()); // 디버깅용
-
         return TeamResponseDto.builder()
                 .id(team.getId())
                 .name(team.getName())
                 .introduce(team.getIntroduce())
                 .mainArea(team.getMainArea())
-                .teamLogo(team.getTeamLogo())
+                .teamLogo(sanitizeLogoUrl(team.getTeamLogo()))
                 .leaderName(team.getLeader().getName())
+                .maxMembers(team.getMaxMembers())
+                .currentMembers(team.getMembers().size())
                 .members(team.getMembers().stream().map(TeamMemberResponseDto::new).collect(Collectors.toList()))
                 .build();
     }
@@ -120,8 +124,10 @@ public class TeamService {
                         .name(team.getName())
                         .introduce(team.getIntroduce())
                         .mainArea(team.getMainArea())
-                        .teamLogo(team.getTeamLogo())
+                        .teamLogo(sanitizeLogoUrl(team.getTeamLogo()))
                         .leaderName(team.getLeader().getName())
+                        .maxMembers(team.getMaxMembers())
+                        .currentMembers(team.getMembers().size())
                         .members(team.getMembers().stream().map(TeamMemberResponseDto::new).collect(Collectors.toList()))
                         .build())
                 .collect(Collectors.toList());
@@ -174,8 +180,10 @@ public class TeamService {
                 .name(team.getName())
                 .introduce(team.getIntroduce())
                 .mainArea(team.getMainArea())
-                .teamLogo(team.getTeamLogo())
+                .teamLogo(sanitizeLogoUrl(team.getTeamLogo()))
                 .leaderName(team.getLeader().getName())
+                .maxMembers(team.getMaxMembers())
+                .currentMembers(team.getMembers().size())
                 .members(team.getMembers().stream().map(TeamMemberResponseDto::new).collect(Collectors.toList()))
                 .build();
     }
@@ -259,5 +267,14 @@ public class TeamService {
                 .map(Team::getLeader)
                 .map(leader -> leader.getEmail().equals(email))
                 .orElse(false);
+    }
+
+    private String sanitizeLogoUrl(String logo) {
+        if (logo == null || logo.isBlank()) {
+            return null;
+        }
+        int lastSlash = logo.lastIndexOf('/');
+        String filename = lastSlash >= 0 ? logo.substring(lastSlash + 1) : logo;
+        return "/uploads/" + filename;
     }
 }

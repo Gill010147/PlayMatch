@@ -23,6 +23,7 @@ export default function MyPage() {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
+        console.log("AuthService.me() called"); // 디버깅 로그 추가
         const profile = await AuthService.me() as any;
 
         if (profile.name) setName(profile.name);
@@ -35,7 +36,12 @@ export default function MyPage() {
         
         if (profile.team && profile.team.id) {
           setTeamId(profile.team.id);
-          setTeamLogoUrl(profile.team.logoUrl || null);
+          const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || '';
+          const fullLogoUrl = profile.team.logoUrl && profile.team.logoUrl.startsWith('/')
+              ? `${apiBaseUrl}${profile.team.logoUrl}`
+              : profile.team.logoUrl;
+          setTeamLogoUrl(fullLogoUrl || null);
+          console.log("Full Team Logo URL:", fullLogoUrl); // 디버깅 로그 추가
         } else {
           setTeamId(null);
           setTeamLogoUrl(null);
@@ -86,6 +92,11 @@ export default function MyPage() {
         </div>
         <div className="profile-right">
           <div className="avatar" aria-label="프로필 이미지">
+            {teamLogoUrl ? (
+              <img src={teamLogoUrl} alt="Team Logo" className="team-logo-display" />
+            ) : (
+              <div className="default-team-logo">팀 로고 없음</div>
+            )}
           </div>
           {teamId ? (
             <div style={{ display: 'flex', gap: '10px' }}>

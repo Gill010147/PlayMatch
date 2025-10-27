@@ -2,7 +2,7 @@
 // Lightweight API client scaffolding for future integration
 // Backend teammate can replace baseUrl and implement real auth headers/interceptors
 
-import type { UserProfile, ProfileRequestDto } from "../../types/domain";
+import type { UserProfile, ProfileRequestDto, VideoFeedbackDetail, Comment } from "../types/domain";
 
 // Temporarily re-defining UserProfile here to try and force linter recognition
 interface UserProfileWithAgeAndPhone extends UserProfile {
@@ -21,7 +21,7 @@ export interface ApiRequestOptions {
 }
 
 const baseUrl = import.meta.env.VITE_API_BASE_URL || ""; // e.g. "/api" or "https://api.example.com"
-const useMocks = String(import.meta.env.VITE_USE_MOCKS) === "true";
+const useMocks = String(import.meta.env.VITE_USE_MOCK_API) === "true";
 
 function buildQueryString(query?: ApiRequestOptions["query"]): string {
   if (!query) return "";
@@ -48,7 +48,7 @@ export async function apiRequest<TResponse = unknown>(options: ApiRequestOptions
 
   // NOTE: Auth header placeholder. Replace with real token retrieval when integrated.
   const token = localStorage.getItem("token");
-  console.log("API Request Token:", token);
+  console.log(`[apiRequest] Path: ${path}, Token:`, token);
   const defaultHeaders: Record<string, string> = {
     "Content-Type": "application/json",
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -98,42 +98,42 @@ export async function apiRequest<TResponse = unknown>(options: ApiRequestOptions
 
 export const AuthService = {
   register: async (payload: any) =>
-    apiRequest({ method: "POST", path: "/api/auth/register", body: payload }),
+      apiRequest({ method: "POST", path: "/api/auth/register", body: payload }),
   login: async (payload: any) =>
-    apiRequest({ method: "POST", path: "/api/auth/login", body: payload }),
+      apiRequest({ method: "POST", path: "/api/auth/login", body: payload }),
   logout: async () =>
-    apiRequest({ method: "POST", path: "/api/auth/logout" }),
+      apiRequest({ method: "POST", path: "/api/auth/logout" }),
   me: async () =>
-    apiRequest<UserProfileWithAgeAndPhone>({ method: "GET", path: "/api/users/me" }),
+      apiRequest<UserProfile>({ method: "GET", path: "/api/users/me" }),
 };
 
 export const ProfilesService = {
   me: async () =>
-    apiRequest({ method: "GET", path: "/api/users/me" }),
+      apiRequest({ method: "GET", path: "/api/users/me" }),
   updateMe: async (payload: any) =>
-    apiRequest({ method: "PUT", path: "/api/profiles/me", body: payload }),
+      apiRequest({ method: "PUT", path: "/api/profiles/me", body: payload }),
   getUser: async (userId: string) =>
-    apiRequest({ method: "GET", path: `/api/profiles/users/${userId}` }),
+      apiRequest({ method: "GET", path: `/api/profiles/users/${userId}` }),
   getTeam: async (teamId: string) =>
-    apiRequest({ method: "GET", path: `/api/teams/${teamId}` }),
+      apiRequest({ method: "GET", path: `/api/teams/${teamId}` }),
   updateTeam: async (teamId: string, payload: any) =>
-    apiRequest({ method: "PUT", path: `/api/teams/${teamId}`, body: payload }),
+      apiRequest({ method: "PUT", path: `/api/teams/${teamId}`, body: payload }),
   getFacility: async (facilityId: string) =>
-    apiRequest({ method: "GET", path: `/api/facilities/${facilityId}` }),
+      apiRequest({ method: "GET", path: `/api/facilities/${facilityId}` }),
 };
 
 // Real service
 const MatchesServiceHttp = {
-  list: async (filters?: Record<string, unknown>) =>
-    apiRequest({ method: "GET", path: "/api/matches", query: filters }),
+  list: async (filters?: Record<string, string | number | boolean | undefined>) =>
+      apiRequest({ method: "GET", path: "/api/matches", query: filters }),
   create: async (payload: any) =>
-    apiRequest({ method: "POST", path: "/api/matches", body: payload }),
+      apiRequest({ method: "POST", path: "/api/matches", body: payload }),
   detail: async (matchId: string) =>
-    apiRequest({ method: "GET", path: `/api/matches/${matchId}` }),
+      apiRequest({ method: "GET", path: `/api/matches/${matchId}` }),
   applyAsMercenary: async (matchId: string, payload: any) =>
-    apiRequest({ method: "POST", path: `/api/matches/${matchId}/apply`, body: payload }),
+      apiRequest({ method: "POST", path: `/api/matches/${matchId}/apply`, body: payload }),
   participants: async (matchId: string) =>
-    apiRequest({ method: "GET", path: `/api/matches/${matchId}/participants` }),
+      apiRequest({ method: "GET", path: `/api/matches/${matchId}/participants` }),
 };
 
 // Mock (localStorage) service for dev without backend
@@ -190,16 +190,13 @@ export const MatchesService = import.meta.env.VITE_USE_MOCK_API === 'true' ? Mat
 // Real service
 const RecommendationsServiceHttp = {
   recommendPlayers: async (payload: any) =>
-    apiRequest({ method: "POST", path: "/api/recommendations/players", body: payload }),
+      apiRequest({ method: "POST", path: "/api/recommendations/players", body: payload }),
 };
 
 // Mock service
 const RecommendationsServiceMock = {
   recommendPlayers: async (criteria: any) => {
     console.log("Mock RecommendationsService.recommendPlayers called with:", criteria);
-    // Return the dummy players that are already defined in RecommendedPlayerDetailPage.tsx
-    // For simplicity, we'll just return a static list for now.
-    // In a real mock, you might filter based on criteria.
     return [
       {
         id: "0",
@@ -234,94 +231,100 @@ export const RecommendationsService = useMocks ? RecommendationsServiceMock : Re
 export const ChatService = {
   // 내 채팅방 목록 조회
   rooms: async () =>
-    apiRequest({ method: "GET", path: "/api/chat/my-rooms" }),
-  
+      apiRequest({ method: "GET", path: "/api/chat/my-rooms" }),
+
   // 1:1 채팅방 생성 또는 조회
   createOrGetRoom: async (participantId: string) =>
-    apiRequest({ method: "POST", path: "/api/chat/rooms", body: { participantId } }),
-  
+      apiRequest({ method: "POST", path: "/api/chat/rooms", body: { participantId } }),
+
   // 그룹 채팅방 생성
   createGroupRoom: async (name: string, participantIds: string[]) =>
-    apiRequest({ method: "POST", path: "/api/chat/rooms", body: { name, participantIds, type: "group" } }),
-  
+      apiRequest({ method: "POST", path: "/api/chat/rooms", body: { name, participantIds, type: "group" } }),
+
   // 채팅방 과거 메시지 조회
   messages: async (roomId: string) =>
-    apiRequest({ method: "GET", path: `/api/chat/rooms/${roomId}/messages` }),
-  
+      apiRequest({ method: "GET", path: `/api/chat/rooms/${roomId}/messages` }),
+
   // 메시지 전송 (WebSocket 대신 HTTP로도 가능)
   sendMessage: async (roomId: string, content: string) =>
-    apiRequest({ method: "POST", path: `/api/chat/rooms/${roomId}/messages`, body: { content } }),
+      apiRequest({ method: "POST", path: `/api/chat/rooms/${roomId}/messages`, body: { content } }),
 
   // 마지막 읽은 시간 업데이트
   updateReadTime: async (roomId: string) =>
-    apiRequest({ method: "POST", path: `/api/chat/rooms/${roomId}/read` }),
+      apiRequest({ method: "POST", path: `/api/chat/rooms/${roomId}/read` }),
 
   // 안 읽은 메시지 개수 조회
   getUnreadCount: async () =>
-    apiRequest<{ count: number }>({ method: "GET", path: "/api/chat/unread-count" }),
+      apiRequest<{ count: number }>({ method: "GET", path: "/api/chat/unread-count" }),
 };
 
 export const ReviewsService = {
   create: async (payload: any) =>
-    apiRequest({ method: "POST", path: "/api/reviews", body: payload }),
+      apiRequest({ method: "POST", path: "/api/reviews", body: payload }),
   listUser: async (userId: string) =>
-    apiRequest({ method: "GET", path: `/api/reviews/users/${userId}` }),
+      apiRequest({ method: "GET", path: `/api/reviews/users/${userId}` }),
   listTeam: async (teamId: string) =>
-    apiRequest({ method: "GET", path: `/api/reviews/teams/${teamId}` }),
+      apiRequest({ method: "GET", path: `/api/reviews/teams/${teamId}` }),
 };
 
-const VIDEO_FEEDBACK_STORAGE_KEY = "playmatch.videoFeedbacks";
-
 export const VideoFeedbackService = {
-  _readAll(): any[] {
-    try {
-      const raw = localStorage.getItem(VIDEO_FEEDBACK_STORAGE_KEY);
-      if (!raw) return [];
-      const parsed = JSON.parse(raw);
-      return Array.isArray(parsed) ? parsed : [];
-    } catch {
-      return [];
-    }
-  },
-  _writeAll(list: any[]) {
-    localStorage.setItem(VIDEO_FEEDBACK_STORAGE_KEY, JSON.stringify(list));
-  },
   list: async () => {
-    return VideoFeedbackService._readAll();
+    return apiRequest<VideoFeedbackDetail[]>({ method: "GET", path: "/api/video-feedbacks" });
   },
   detail: async (videoId: string) => {
-    const list = VideoFeedbackService._readAll();
-    return (list.find((f) => f.id === videoId) || null) as any;
+    return apiRequest<VideoFeedbackDetail>({ method: "GET", path: `/api/video-feedbacks/${videoId}` });
   },
   addComment: async (videoId: string, commentText: string) => {
-    console.log(`Adding comment to video ${videoId}: ${commentText}`);
-    return { success: true };
+    return apiRequest<Comment>({ method: "POST", path: `/api/video-feedbacks/${videoId}/comments`, body: { text: commentText } });
+  },
+  updateComment: async (videoId: string, commentId: string, commentText: string) => {
+    return apiRequest<Comment>({ method: "PUT", path: `/api/video-feedbacks/${videoId}/comments/${commentId}`, body: { text: commentText } });
+  },
+  deleteComment: async (videoId: string, commentId: string) => {
+    return apiRequest<void>({ method: "DELETE", path: `/api/video-feedbacks/${videoId}/comments/${commentId}` });
   },
   uploadVideoFeedback: async (payload: { title: string; description: string; videoFile: File }) => {
-    const list = VideoFeedbackService._readAll();
-    const newId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-    const newFeedback = {
-      id: newId,
-      title: payload.title,
-      description: payload.description,
-      videoUrl: URL.createObjectURL(payload.videoFile),
-      uploadDate: new Date().toISOString().split('T')[0],
-      commentsCount: 0,
-    };
-    list.unshift(newFeedback); // Add to the beginning
-    VideoFeedbackService._writeAll(list);
-    return newFeedback;
+    const formData = new FormData();
+    formData.append('videoFile', payload.videoFile);
+    formData.append('title', payload.title);
+    formData.append('description', payload.description);
+
+    const token = localStorage.getItem("token");
+    const res = await fetch(`${import.meta.env.VITE_API_BASE_URL || ''}/api/video-feedbacks`, {
+      method: "POST",
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      body: formData,
+    });
+
+    if (!res.ok) {
+      const message = (await res.text()) || "영상 업로드 실패";
+      throw new ApiError(message, res.status);
+    }
+
+    const contentType = res.headers.get("content-type") || "";
+    if (contentType.includes("application/json")) {
+      return await res.json() as VideoFeedbackDetail;
+    } else if (contentType.includes("text/plain")) {
+      return await res.text();
+    }
+    return undefined;
+  },
+  updateVideoFeedback: async (videoId: string, payload: { title: string; description: string }) => {
+    return apiRequest<VideoFeedbackDetail>({ method: "PUT", path: `/api/video-feedbacks/${videoId}`, body: payload });
+  },
+  deleteVideoFeedback: async (videoId: string) => {
+    return apiRequest<void>({ method: "DELETE", path: `/api/video-feedbacks/${videoId}` });
   },
 };
 
 export const TeamsService = {
   // 일반 텍스트/JSON 업로드용 (기본)
   create: async (payload: any) =>
-    apiRequest({
-      method: "POST",
-      path: "/api/teams",
-      body: payload,
-    }),
+      apiRequest({
+        method: "POST",
+        path: "/api/teams",
+        body: payload,
+      }),
 
   // ✅ 이미지 파일(FormData) 업로드용
   createWithFile: async (formData: FormData) => {
@@ -329,7 +332,7 @@ export const TeamsService = {
     const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/teams`, {
       method: "POST",
       headers: token ? { Authorization: `Bearer ${token}` } : {},
-      body: formData, // FormData는 자동으로 Content-Type이 multipart/form-data로 설정됨
+      body: formData,
     });
 
     if (!res.ok) {
@@ -337,7 +340,6 @@ export const TeamsService = {
       throw new ApiError(message, res.status);
     }
 
-    // JSON이든 텍스트든 알아서 반환
     const contentType = res.headers.get("content-type") || "";
     if (contentType.includes("application/json")) {
       return await res.json();
@@ -352,12 +354,12 @@ export const TeamsService = {
 
   // 팀 상세 조회
   detail: async (teamId: string) =>
-    apiRequest({ method: "GET", path: `/api/teams/${teamId}` }),
+      apiRequest({ method: "GET", path: `/api/teams/${teamId}` }),
 
   // 내 팀 목록 조회
   myTeams: async () => apiRequest({ method: "GET", path: "/api/teams/my" }),
 
   // 팀 정보 수정
   update: async (teamId: string, payload: any) =>
-    apiRequest({ method: "PUT", path: `/api/teams/${teamId}`, body: payload }),
+      apiRequest({ method: "PUT", path: `/api/teams/${teamId}`, body: payload }),
 };

@@ -1,6 +1,7 @@
 package com.playmatch.playmatch.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.playmatch.playmatch.dto.ChatMessageResponseDto;
@@ -22,20 +23,28 @@ import org.springframework.context.annotation.Profile;
 @Configuration
 public class RedisConfig {
 
-    // 기존 RedisConnectionFactory 빈은 그대로 사용 (LettuceConnectionFactory)
-    // application.yml의 host, port를 자동으로 읽어 생성됩니다.
+    @Bean
+    public ObjectMapper objectMapper() {
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        return objectMapper;
+    }
 
     /**
      * Redis에 메시지를 발행(publish)하기 위한 RedisTemplate 설정
      * 직렬화 방식을 JSON으로 설정하여 DTO 객체를 직접 전송할 수 있도록 합니다.
      */
     @Bean
-    public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory connectionFactory) {
+    public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory connectionFactory, ObjectMapper objectMapper) {
         RedisTemplate<String, Object> template = new RedisTemplate<>();
         template.setConnectionFactory(connectionFactory);
         template.setKeySerializer(new StringRedisSerializer());
-        // ChatMessageResponseDto를 JSON으로 직렬화
-        template.setValueSerializer(new Jackson2JsonRedisSerializer<>(ChatMessageResponseDto.class));
+
+        // 값 직렬화에 GenericJackson2JsonRedisSerializer 사용 (권장 방식)
+        GenericJackson2JsonRedisSerializer jsonRedisSerializer = new GenericJackson2JsonRedisSerializer(objectMapper);
+
+        template.setValueSerializer(jsonRedisSerializer);
         return template;
     }
 

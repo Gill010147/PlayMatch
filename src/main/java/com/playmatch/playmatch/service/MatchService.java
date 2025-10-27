@@ -7,11 +7,16 @@ import com.playmatch.playmatch.dto.MatchResponseDto;
 import com.playmatch.playmatch.dto.UpdateApplicationStatusRequestDto;
 import com.playmatch.playmatch.dto.UpdateMatchStatusRequestDto;
 import com.playmatch.playmatch.repository.*;
+import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -58,9 +63,27 @@ public class MatchService {
     }
 
     @Transactional(readOnly = true)
-    public List<MatchResponseDto> getMatches() {
-        // 경기 날짜가 가까운 순으로 정렬하여 모든 경기를 조회합니다.
-        List<Match> matches = matchRepository.findAll(Sort.by(Sort.Direction.ASC, "matchDate"));
+    public List<MatchResponseDto> getMatches(String region, LocalDate date, String title) {
+        Specification<Match> spec = (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            if (region != null && !region.isEmpty()) {
+                predicates.add(cb.like(root.get("locationName"), "%" + region + "%"));
+            }
+            if (date != null) {
+                LocalDateTime dateStart = date.atStartOfDay();
+                LocalDateTime dateEnd = date.plusDays(1).atStartOfDay();
+                predicates.add(cb.greaterThanOrEqualTo(root.get("matchDate"), dateStart));
+                predicates.add(cb.lessThan(root.get("matchDate"), dateEnd));
+            }
+            if (title != null && !title.isEmpty()) {
+                predicates.add(cb.like(root.get("title"), "%" + title + "%"));
+            }
+
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+
+        List<Match> matches = matchRepository.findAll(spec, Sort.by(Sort.Direction.ASC, "matchDate"));
         return matches.stream()
                 .map(match -> {
                     // 실제 주최팀 멤버 수 + 수락된 용병 수

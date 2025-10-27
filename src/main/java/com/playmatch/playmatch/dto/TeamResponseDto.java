@@ -16,5 +16,7 @@ public class TeamResponseDto {
     private final String mainArea;
     private final String teamLogo;
     private final String leaderName;
+    private final Integer maxMembers;
+    private final Integer currentMembers;
     private final List<TeamMemberResponseDto> members;
 }

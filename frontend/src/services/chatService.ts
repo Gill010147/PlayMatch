@@ -6,67 +6,91 @@ import { ChatService as ChatApiService } from './api';
 class ChatService {
   private client: Client;
   private isConnected = false;
-  private messageHandlers: ((message: ChatMessage) => void)[] = [];
+  private connectionPromise: Promise<void> | null = null; // 연결 상태를 추적하는 Promise
+  private resolveConnection: (() => void) | null = null; // Promise resolve 함수 저장
+  private rejectConnection: ((reason?: any) => void) | null = null; // Promise reject 함수 저장
 
   constructor() {
     this.client = new Client({
-      // SockJS를 WebSocket 팩토리로 사용
       webSocketFactory: () => new SockJS(`${import.meta.env.VITE_API_BASE_URL}/ws-stomp`),
-      
-      // 연결 시 JWT 토큰 인증 헤더 추가
       connectHeaders: {
         Authorization: `Bearer ${localStorage.getItem('token')}`,
       },
-
-      // 디버그 메시지 비활성화 (필요 시 활성화)
       debug: (str) => {
         // console.log(new Date(), str);
       },
-
-      // 1초마다 재연결 시도
       reconnectDelay: 1000,
     });
 
+    // 핸들러는 생성자에서 한 번만 설정합니다.
     this.client.onConnect = (frame) => {
       this.isConnected = true;
       console.log('STOMP 연결 성공:', frame);
-      
-      // 모든 채팅방 구독을 여기서 관리할 수 있음
-      // 예: chatService.subscribeToRoom(roomId, handler);
+      if (this.resolveConnection) {
+        this.resolveConnection();
+        this.resolveConnection = null; // 사용 후 초기화
+        this.rejectConnection = null; // 사용 후 초기화
+      }
     };
 
     this.client.onStompError = (frame) => {
       console.error('Broker reported error: ' + frame.headers['message']);
       console.error('Additional details: ' + frame.body);
+      this.isConnected = false;
+      if (this.rejectConnection) {
+        this.rejectConnection(new Error('STOMP 연결 오류'));
+        this.resolveConnection = null; // 사용 후 초기화
+        this.rejectConnection = null; // 사용 후 초기화
+      }
     };
 
     this.client.onWebSocketClose = () => {
       this.isConnected = false;
       console.log('STOMP 연결 종료');
+      // 연결이 끊겼을 때 대기 중인 Promise가 있다면 reject
+      if (this.rejectConnection) {
+        this.rejectConnection(new Error('STOMP 연결 종료'));
+        this.resolveConnection = null;
+        this.rejectConnection = null;
+      }
     };
   }
 
   // STOMP 클라이언트 활성화
-  public connect() {
-    if (!this.client.active) {
-      this.client.activate();
+  public connect(): Promise<void> {
+    if (this.client.active && this.isConnected) {
+      return Promise.resolve();
     }
+
+    if (this.connectionPromise) {
+      return this.connectionPromise;
+    }
+
+    this.connectionPromise = new Promise((resolve, reject) => {
+      this.resolveConnection = resolve;
+      this.rejectConnection = reject;
+
+      // 연결 시도
+      this.client.activate();
+    });
+
+    return this.connectionPromise;
   }
 
   // STOMP 클라이언트 비활성화
   public disconnect() {
     if (this.client.active) {
       this.client.deactivate();
+      this.isConnected = false;
+      this.connectionPromise = null; // 연결 Promise 초기화
+      this.resolveConnection = null;
+      this.rejectConnection = null;
     }
   }
 
   // 특정 채팅방 구독
   public subscribeToRoom(roomId: string, onMessageReceived: (message: ChatMessage) => void) {
-    if (!this.isConnected) {
-      console.warn('STOMP is not connected. Cannot subscribe.');
-      return () => {}; // Unsubscribe function
-    }
-
+    // connect() Promise가 연결을 보장하므로 여기서 isConnected 체크는 불필요
     const subscription = this.client.subscribe(`/sub/chat/room/${roomId}`, (message: IMessage) => {
       try {
         const parsedMessage: ChatMessage = JSON.parse(message.body);

@@ -17,6 +17,25 @@
   justify-content: center;
 }
 
+.text-input {
+  border: 1px solid #ddd;
+  padding: 12px;
+  border-radius: 6px;
+  width: 100%;
+  font-size: 16px;
+}
+
+.button-sm {
+  padding: 8px 12px;
+  font-size: 14px;
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+
 .logo {
   height: 72px;
   width: auto;

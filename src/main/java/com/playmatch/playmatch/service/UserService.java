@@ -3,6 +3,7 @@ package com.playmatch.playmatch.service;
 import com.playmatch.playmatch.domain.User;
 import com.playmatch.playmatch.domain.UserRoleEnum;
 import com.playmatch.playmatch.dto.LoginRequestDto;
+import com.playmatch.playmatch.dto.Point;
 import com.playmatch.playmatch.dto.SignUpRequestDto;
 import com.playmatch.playmatch.dto.UserProfileResponseDto;
 import com.playmatch.playmatch.jwt.JwtUtil;
@@ -11,6 +12,7 @@ import com.playmatch.playmatch.security.UserDetailsImpl;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j; // Slf4j 임포트 추가
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -18,9 +20,11 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 
+@Slf4j // Slf4j 어노테이션 추가
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -29,6 +33,7 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
     private final RedisTemplate<String, Object> redisTemplate;
+    private final KakaoApiService kakaoApiService; // KakaoApiService 주입
 
     @Transactional
     public void signUp(SignUpRequestDto requestDto) {
@@ -53,6 +58,13 @@ public class UserService {
                 .role(UserRoleEnum.USER) // 기본 권한을 USER로 설정
                 .build();
 
+        // 주소로 좌표를 얻어와서 User에 설정
+        if (requestDto.getFullAddress() != null && !requestDto.getFullAddress().isBlank()) {
+            Point coordinates = kakaoApiService.getCoordinates(requestDto.getFullAddress());
+            user.setLatitude(coordinates.getLatitude());
+            user.setLongitude(coordinates.getLongitude());
+        }
+
         userRepository.save(user);
     }
 
@@ -69,8 +81,11 @@ public class UserService {
         return jwtUtil.createToken(user.getEmail(), user.getRole());
     }
 
-    public UserProfileResponseDto getUserProfile(UserDetailsImpl userDetails) {
-        User user = userDetails.getUser();
+    @Transactional(readOnly = true)
+    public UserProfileResponseDto getUserProfile(String email) {
+        User user = userRepository.findByEmail(email).orElseThrow(
+                () -> new IllegalArgumentException("사용자를 찾을 수 없습니다.")
+        );
         return new UserProfileResponseDto(user);
     }
 

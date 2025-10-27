@@ -9,6 +9,7 @@ export default function CreateTeamProfilePage() {
   const [mainArea, setMainArea] = useState("");
   const [teamLogo, setTeamLogo] = useState<File | null>(null);
   const [teamLogoPreview, setTeamLogoPreview] = useState<string | null>(null);
+  const [maxMembers, setMaxMembers] = useState<number>(20);
   const [saving, setSaving] = useState(false);
 
   // ✅ 파일 변경 시 미리보기
@@ -55,6 +56,7 @@ export default function CreateTeamProfilePage() {
         name: teamName,
         introduce: shortIntroduction,
         mainArea: mainArea, // mainArea 추가
+        maxMembers: maxMembers, // maxMembers 추가
       };
       formData.append(
         "requestDto",
@@ -181,6 +183,29 @@ export default function CreateTeamProfilePage() {
             value={mainArea}
             onChange={(e) => setMainArea(e.target.value)}
             placeholder="주요 활동 지역을 입력해주세요. (예: 서울시 강남구)"
+            style={{
+              border: "1px solid #ddd",
+              padding: "8px",
+              borderRadius: "4px",
+              width: "100%",
+            }}
+            required
+          />
+        </div>
+
+        <div>
+          <label
+            htmlFor="maxMembers"
+            style={{ display: "block", marginBottom: "8px", fontWeight: "bold" }}
+          >
+            최대 인원:
+          </label>
+          <input
+            type="number"
+            id="maxMembers"
+            value={maxMembers}
+            onChange={(e) => setMaxMembers(Number(e.target.value))}
+            placeholder="최대 인원을 입력해주세요."
             style={{
               border: "1px solid #ddd",
               padding: "8px",

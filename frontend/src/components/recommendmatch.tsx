@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import "./recommendmatch.css";
 import { useNavigate } from "react-router-dom";
 import { ChatService } from "../services/api"; // ChatService 임포트
+import { AuthService } from "../services/api"; // AuthService 임포트
 
 // 백엔드의 MatchResponseDto와 일치하는 인터페이스
 interface Match {
@@ -22,6 +23,20 @@ interface RecommendedMatchListProps {
 
 const RecommendedMatchList: React.FC<RecommendedMatchListProps> = ({ matches = [] }) => {
   const navigate = useNavigate();
+  const [currentUserId, setCurrentUserId] = useState<number | null>(null);
+
+  useEffect(() => {
+    const fetchCurrentUser = async () => {
+      try {
+        const user = await AuthService.me();
+        setCurrentUserId(parseInt(user.id, 10));
+      } catch (error) {
+        console.error("현재 사용자 정보 로드 실패:", error);
+        setCurrentUserId(null); // 에러 발생 시 ID 초기화
+      }
+    };
+    fetchCurrentUser();
+  }, []);
 
   // 경기 아이템 클릭 시 상세 페이지로 이동
   const handleItemClick = (matchId: number) => {
@@ -31,6 +46,10 @@ const RecommendedMatchList: React.FC<RecommendedMatchListProps> = ({ matches = [
   // '연락하기' 버튼 클릭 시 채팅방 생성/이동
   const handleContactHost = async (e: React.MouseEvent, hostUserId: number) => {
     e.stopPropagation(); // 부모 요소(li)의 클릭 이벤트 전파 방지
+    if (currentUserId === hostUserId) {
+      alert("자신에게는 연락할 수 없습니다.");
+      return;
+    }
     try {
       // 1:1 채팅방 생성 또는 조회 API 호출
       const room = await ChatService.createOrGetRoom(String(hostUserId));
@@ -60,7 +79,11 @@ const RecommendedMatchList: React.FC<RecommendedMatchListProps> = ({ matches = [
               <span className="match-detail">
                 {match.title}
               </span>
-              <button onClick={(e) => handleContactHost(e, match.hostUserId)}>
+              <button
+                onClick={(e) => handleContactHost(e, match.hostUserId)}
+                disabled={currentUserId === match.hostUserId} // 자신이 주최자인 경우 버튼 비활성화
+                style={{ opacity: currentUserId === match.hostUserId ? 0.5 : 1, cursor: currentUserId === match.hostUserId ? 'not-allowed' : 'pointer' }}
+              >
                 주최자에게 연락
               </button>
             </li>

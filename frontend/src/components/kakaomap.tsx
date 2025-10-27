@@ -78,9 +78,9 @@ export default function KakaoMap({ matches }: KakaoMapProps) {
               content: `
                 <div style="padding: 15px; min-width: 250px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
                   <div style="display: flex; align-items: center; margin-bottom: 12px;">
-                    <div style="width: 8px; height: 8px; border-radius: 50%; background-color: ${match.status === 'RECRUITING' ? '#4CAF50' : '#FF5722'}; margin-right: 8px;"></div>
-                    <span style="font-size: 12px; color: ${match.status === 'RECRUITING' ? '#4CAF50' : '#FF5722'}; font-weight: 600; text-transform: uppercase;">
-                      ${match.status === 'RECRUITING' ? '모집중' : '마감'}
+                    <div style="width: 8px; height: 8px; border-radius: 50%; background-color: ${getMatchStatusColor(match.status)}; margin-right: 8px;"></div>
+                    <span style="font-size: 12px; color: ${getMatchStatusColor(match.status)}; font-weight: 600; text-transform: uppercase;">
+                      ${getMatchStatusText(match.status)}
                     </span>
                   </div>
                   <h3 style="margin: 0 0 8px 0; color: #333; font-size: 16px; font-weight: 600;">${match.title}</h3>
@@ -90,14 +90,36 @@ export default function KakaoMap({ matches }: KakaoMapProps) {
                   <div style="margin-bottom: 8px;">
                     <span style="color: #666; font-size: 13px;">📍 ${match.locationName}</span>
                   </div>
-                  <div style="margin-bottom: 0;">
+                  <div style="margin-bottom: 12px;">
                     <span style="color: #666; font-size: 13px;">👥 ${match.memberCount} / ${match.maxMemberCount}</span>
                   </div>
+                  <a href="/matches/${match.id}" style="display: block; text-align: center; padding: 8px 0; background-color: #4CAF50; color: #fff; text-decoration: none; border-radius: 4px; font-size: 14px; font-weight: 500;">경기 상세 보기</a>
                 </div>
               `,
               removable: true,
               zIndex: 1000
             });
+
+            // Helper functions for match status display
+            function getMatchStatusColor(status: string): string {
+              switch (status) {
+                case 'RECRUITING': return '#4CAF50'; // Green
+                case 'RECRUITMENT_COMPLETE': return '#2196F3'; // Blue
+                case 'COMPLETED': return '#FF9800'; // Orange
+                case 'CANCELLED': return '#F44336'; // Red
+                default: return '#9E9E9E'; // Grey
+              }
+            }
+
+            function getMatchStatusText(status: string): string {
+              switch (status) {
+                case 'RECRUITING': return '모집중';
+                case 'RECRUITMENT_COMPLETE': return '모집완료';
+                case 'COMPLETED': return '마감됨';
+                case 'CANCELLED': return '경기취소';
+                default: return '알 수 없음';
+              }
+            }
 
             kakao.maps.event.addListener(marker, 'click', function() {
               infowindow.open(map, marker);

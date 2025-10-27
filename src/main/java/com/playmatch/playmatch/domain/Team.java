@@ -39,11 +39,17 @@ public class Team {
     @Column(name = "team_logo")
     private String teamLogo;
 
+    @Builder.Default
+    @Column(name = "max_members")
+    private Integer maxMembers = 20; // 기본값 설정
+
     public void update(TeamRequestDto requestDto) {
         this.name = requestDto.getName();
         this.introduce = requestDto.getIntroduce();
         this.mainArea = requestDto.getMainArea();
-        this.teamLogo = requestDto.getTeamLogo();
+        if (requestDto.getMaxMembers() != null) { // 최대 인원 업데이트 추가
+            this.maxMembers = requestDto.getMaxMembers();
+        }
     }
 
     //== [추가] 연관관계 편의 메서드 ==//

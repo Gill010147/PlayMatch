@@ -32,18 +32,27 @@ export default function ChatRoomPage() {
     if (!roomId) return;
 
     loadRoomData();
-    chatService.connect();
+    
+    const setupWebSocket = async () => {
+      try {
+        await chatService.connect(); // 연결이 완료될 때까지 기다립니다.
+        const unsubscribe = chatService.subscribeToRoom(roomId, (message) => {
+          // STOMP 메시지에는 roomId가 없을 수 있으므로, 현재 roomId를 추가해줍니다.
+          const messageWithRoomId = { ...message, roomId };
+          setMessages(prev => [...prev, messageWithRoomId]);
+        });
+        chatService.updateReadTime(roomId);
+        return unsubscribe;
+      } catch (error) {
+        console.error("웹소켓 연결 또는 구독 실패:", error);
+        return () => {}; // 에러 발생 시 빈 함수 반환
+      }
+    };
 
-    const unsubscribe = chatService.subscribeToRoom(roomId, (message) => {
-      // STOMP 메시지에는 roomId가 없을 수 있으므로, 현재 roomId를 추가해줍니다.
-      const messageWithRoomId = { ...message, roomId };
-      setMessages(prev => [...prev, messageWithRoomId]);
-    });
-
-    chatService.updateReadTime(roomId);
+    const unsubscribePromise = setupWebSocket();
 
     return () => {
-      unsubscribe();
+      unsubscribePromise.then(unsubscribe => unsubscribe());
     };
   }, [roomId]);
 

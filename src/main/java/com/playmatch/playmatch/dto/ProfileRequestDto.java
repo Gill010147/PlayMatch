@@ -16,4 +16,5 @@ ProfileRequestDto {
     private List<String> playStyles;
     private List<String> positions;
     private List<String> skills;
+    private String phone; // phone 필드 추가
 }

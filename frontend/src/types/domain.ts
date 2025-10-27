@@ -1,13 +1,13 @@
 // Shared domain types for compile-time safety across pages
 
 export interface UserProfile {
-  id: string;
+  id: string | number; // Changed to string | number for flexibility
   email: string;
   name: string;
   gender?: "male" | "female";
   region?: { city?: string; district?: string; neighborhood?: string; fullAddress?: string };
-  age?: string; // Add age property
-  phone?: string; // Add phone property
+  age?: string;
+  phone?: string;
   positions?: string[];
   playStyles?: string[];
   skills?: string[];
@@ -17,8 +17,11 @@ export interface UserProfile {
 export interface TeamProfile {
   id: string;
   name: string;
-  region?: string;
-  description?: string;
+  mainArea?: string;
+  introduce?: string; // 상세 설명 추가
+  teamLogo?: string | null; // 팀 로고 URL 추가
+  maxMembers?: number;
+  currentMembers?: number;
 }
 
 export interface FacilityProfile {
@@ -83,6 +86,21 @@ export interface Team {
   members: any[];
 }
 
+export interface Comment {
+  id: string;
+  authorName: string;
+  authorId: number; // Added authorId
+  text: string;
+  createdAt: string;
+}
 
-
-
+export interface VideoFeedbackDetail {
+  id: string;
+  title: string;
+  videoUrl: string;
+  description: string;
+  uploadDate: string;
+  uploaderName: string;
+  uploaderId: number; // Added uploaderId
+  comments: Comment[];
+}

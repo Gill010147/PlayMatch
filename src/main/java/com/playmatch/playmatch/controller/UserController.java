@@ -1,6 +1,7 @@
 package com.playmatch.playmatch.controller;
 
 import com.playmatch.playmatch.dto.ProfileResponseDto;
+import com.playmatch.playmatch.dto.UserProfileResponseDto; // 추가
 import com.playmatch.playmatch.service.ProfileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -20,8 +21,9 @@ public class UserController {
 
     @GetMapping("/me")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<ProfileResponseDto> getMyProfile(Principal principal) {
-        ProfileResponseDto profile = profileService.getMyProfile(principal.getName());
+    public ResponseEntity<UserProfileResponseDto> getMyProfile(Principal principal) {
+        System.out.println("UserController.getMyProfile called for user: " + principal.getName()); // 디버깅용
+        UserProfileResponseDto profile = profileService.getMyProfile(principal.getName());
         return ResponseEntity.ok(profile);
     }
 }

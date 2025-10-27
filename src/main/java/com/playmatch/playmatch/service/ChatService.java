@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -39,7 +40,11 @@ public class ChatService {
         Optional<ChatRoom> existingRoom = chatRoomMemberRepository.findExistingChatRoom(me.getId(), other.getId());
 
         if (existingRoom.isPresent()) {
-            return new ChatRoomResponseDto(existingRoom.get(), me);
+            ChatRoom chatRoom = existingRoom.get();
+            LocalDateTime lastMessageAt = chatMessageRepository.findTopByChatRoomOrderByCreatedAtDesc(chatRoom)
+                    .map(ChatMessage::getCreatedAt)
+                    .orElse(chatRoom.getCreatedAt()); // 메시지가 없으면 채팅방 생성 시간
+            return new ChatRoomResponseDto(chatRoom, me, lastMessageAt);
         } else {
             // Create a new chat room
             ChatRoom newRoom = ChatRoom.builder()
@@ -53,7 +58,8 @@ public class ChatService {
             newRoom.addMember(otherMember);
 
             ChatRoom savedRoom = chatRoomRepository.saveAndFlush(newRoom);
-            return new ChatRoomResponseDto(savedRoom, me);
+            // 새로 생성된 방이므로 lastMessageAt은 생성 시간
+            return new ChatRoomResponseDto(savedRoom, me, savedRoom.getCreatedAt());
         }
     }
 
@@ -75,7 +81,7 @@ public class ChatService {
         User user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
 
-        List<ChatRoomMember> memberships = chatRoomMemberRepository.findAllByUser(user);
+        List<ChatRoomMember> memberships = chatRoomMemberRepository.findAllByUserWithChatRoomAndMembers(user);
 
         int totalUnreadCount = 0;
         for (ChatRoomMember member : memberships) {
@@ -105,9 +111,15 @@ public class ChatService {
         User me = userRepository.findByEmail(myEmail)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
 
-        return chatRoomMemberRepository.findAllByUser(me).stream()
+        return chatRoomMemberRepository.findAllByUserWithChatRoomAndMembers(me).stream()
                 .map(ChatRoomMember::getChatRoom)
-                .map(chatRoom -> new ChatRoomResponseDto(chatRoom, me))
+                .distinct() // 중복 ChatRoom 방지
+                .map(chatRoom -> {
+                    LocalDateTime lastMessageAt = chatMessageRepository.findTopByChatRoomOrderByCreatedAtDesc(chatRoom)
+                            .map(ChatMessage::getCreatedAt)
+                            .orElse(chatRoom.getCreatedAt()); // 메시지가 없으면 채팅방 생성 시간
+                    return new ChatRoomResponseDto(chatRoom, me, lastMessageAt);
+                })
                 .collect(Collectors.toList());
     }
 

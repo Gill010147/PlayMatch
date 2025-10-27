@@ -24,13 +24,13 @@ public class TeamMember {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    // 추후 '주장', '부주장', '팀원' 등 역할을 부여할 수 있도록 확장 가능
-    // @Enumerated(EnumType.STRING)
-    // private TeamRole role;
+    @Column(nullable = false)
+    private boolean isLeader; // 리더 여부 필드 추가
 
     @Builder
-    public TeamMember(Team team, User user) {
+    public TeamMember(Team team, User user, boolean isLeader) {
         this.team = team;
         this.user = user;
+        this.isLeader = isLeader;
     }
 }

@@ -18,8 +18,11 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestParam; // 추가
+import org.springframework.format.annotation.DateTimeFormat; // 추가
 
 import java.security.Principal;
+import java.time.LocalDate; // 추가
 import java.util.List;
 
 @RestController
@@ -38,8 +41,11 @@ public class MatchController {
     }
 
     @GetMapping
-    public ResponseEntity<List<MatchResponseDto>> getMatches() {
-        List<MatchResponseDto> matches = matchService.getMatches();
+    public ResponseEntity<List<MatchResponseDto>> getMatches(
+            @RequestParam(required = false) String region,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+            @RequestParam(required = false) String title) {
+        List<MatchResponseDto> matches = matchService.getMatches(region, date, title);
         return ResponseEntity.ok(matches);
     }
 

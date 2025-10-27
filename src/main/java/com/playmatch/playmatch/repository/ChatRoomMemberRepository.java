@@ -12,13 +12,17 @@ import java.util.Optional;
 
 public interface ChatRoomMemberRepository extends JpaRepository<ChatRoomMember, Long> {
 
-    List<ChatRoomMember> findAllByUser(User user);
+    @Query("SELECT crm FROM ChatRoomMember crm " +
+           "JOIN FETCH crm.chatRoom cr " +
+           "JOIN FETCH cr.members crm2 " +
+           "JOIN FETCH crm2.user " +
+           "WHERE crm.user = :user")
+    List<ChatRoomMember> findAllByUserWithChatRoomAndMembers(@Param("user") User user);
 
-    @Query("SELECT crm1.chatRoom FROM ChatRoomMember crm1 " +
-           "JOIN crm1.chatRoom cr " +
-           "JOIN cr.members crm2 " +
-           "WHERE crm1.user.id = :user1Id AND crm2.user.id = :user2Id " +
-           "AND (SELECT COUNT(m) FROM cr.members m) = 2")
+    @Query("SELECT cr FROM ChatRoom cr " +
+           "WHERE (SELECT COUNT(m.id) FROM cr.members m) = 2 " +
+           "  AND EXISTS (SELECT m FROM cr.members m WHERE m.user.id = :user1Id) " +
+           "  AND EXISTS (SELECT m FROM cr.members m WHERE m.user.id = :user2Id)")
     Optional<ChatRoom> findExistingChatRoom(@Param("user1Id") Integer user1Id, @Param("user2Id") Integer user2Id);
 
     Optional<ChatRoomMember> findByChatRoomAndUser(ChatRoom chatRoom, User user);
