@@ -2,7 +2,8 @@
 
 ![Java](https://img.shields.io/badge/java-%23ED8B00.svg?style=for-the-badge&logo=openjdk&logoColor=white) ![Spring](https://img.shields.io/badge/spring-%236DB33F.svg?style=for-the-badge&logo=spring&logoColor=white) ![React](https://img.shields.io/badge/react-%2320232A.svg?style=for-the-badge&logo=react&logoColor=%2361DAFB) ![TypeScript](https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white) ![Postgres](https://img.shields.io/badge/postgres-%23316192.svg?style=for-the-badge&logo=postgresql&logoColor=white) ![Redis](https://img.shields.io/badge/redis-%23DD0031.svg?style=for-the-badge&logo=redis&logoColor=white)
 
-![메인 페이지](./홍보_메인페이지.png)
+<img width="1576" height="812" alt="image" src="https://github.com/user-attachments/assets/e88dec3d-c964-4c59-88fe-dadd9a52e347" />
+
 
 ## 1. 📖 프로젝트 개요
 
@@ -40,11 +41,13 @@
 ## 4. 📸 핵심 기능 시연
 
 ### 지능형 용병 추천
-![용병 추천 결과](./용병추천결과화면.png)
+<img width="780" height="463" alt="image" src="https://github.com/user-attachments/assets/59ae85dd-e301-44de-b86b-868cdb97da3b" />
+
 *사용자가 원하는 포지션, 스킬, 지역을 선택하면, 하버사인 공식(Haversine formula)을 이용한 거리 점수를 포함한 복합적인 가중치 시스템을 통해 최적의 용병을 추천합니다. 결과는 넘겨볼 수 있는 캐러셀 UI로 제공되며, '연락하기' 버튼으로 즉시 1:1 채팅을 시작할 수 있습니다.*
 
 ### 실시간 채팅
-![실시간 채팅](./채팅.png)
+<img width="928" height="817" alt="image" src="https://github.com/user-attachments/assets/379d6538-ed2d-448c-9ea6-a22c660eab61" />
+
 *STOMP와 Redis 메시지 브로커를 기반으로 구현된 실시간 채팅 화면입니다. 이를 통해 여러 서버 인스턴스 환경에서도 지연 없이 안정적인 메시지 송수신이 가능합니다.*
 
 ---
