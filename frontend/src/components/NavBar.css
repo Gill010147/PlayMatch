@@ -1,0 +1,106 @@
+/* 전체 네비게이션 헤더 */
+.navbar {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 50px; /* 위에서 간격 */
+}
+
+/* 가운데 메뉴 */
+.nav-center-menu {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  gap: 150px; /* 메뉴 간격 */
+}
+
+.nav-link {
+  color: #222;
+  text-decoration: none;
+  font-size: 16px;
+  padding: 8px 10px;
+  border-radius: 8px;
+}
+
+.nav-link:hover {
+  background: #f5f5f5;
+}
+
+/* 오른쪽 로그인 버튼 */
+.nav-login {
+  position: absolute;
+  top: 10px;     /* 헤더 상단에서 거리 */
+  right: 40px;   /* 오른쪽에서 거리 */
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.login-text {
+  font-weight: 500;
+  font-size: 16px;
+}
+
+/* 마이페이지 아이콘 버튼 */
+.icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 9999px;
+  border: 1px solid #e3e3e3;
+  background: #fff;
+  color: #111827;
+  cursor: pointer;
+}
+
+.icon-button:hover {
+  background: rgb(96, 95, 95);
+}
+
+.nav-menu-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-decoration: none;
+  color: inherit;
+}
+
+.nav-menu-icon {
+  width: 28px;  /* 실제 예시와 비슷한 크기로 조절 */
+  height: 28px;
+  margin-bottom: 2px;
+}
+
+.nav-menu-ko {
+  font-size: 19px;   /* 예시처럼 좀 더 크고 진하게 */
+  font-weight: 600;
+  margin-bottom: 0px;
+}
+
+.nav-menu-eng {
+  font-size: 16px;
+  font-weight: 500;
+  color: #24292f;
+  margin-top: -2px;
+  letter-spacing: 0.1px;
+}
+
+.notification-badge {
+  position: absolute;
+  top: -5px;
+  right: 20px; /* 아이콘과의 거리를 고려하여 조정 */
+  background-color: red;
+  color: white;
+  border-radius: 50%;
+  padding: 3px 6px;
+  font-size: 12px;
+  font-weight: bold;
+  line-height: 1;
+  min-width: 20px;
+  text-align: center;
+  border: 2px solid white;
+  pointer-events: none; /* 뱃지가 클릭 이벤트를 방해하지 않도록 */
+}

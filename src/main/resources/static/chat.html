@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>PlayMatch Chat Test</title>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.6.1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+    <style>
+        body { font-family: sans-serif; display: flex; flex-direction: column; }
+        .container { display: flex; width: 100%; }
+        .left-panel, .right-panel { padding: 10px; }
+        .left-panel { width: 30%; border-right: 1px solid #ccc; }
+        .right-panel { width: 70%; }
+        #login-area, #new-chat-area, #my-rooms-area { margin-bottom: 10px; padding: 10px; border: 1px solid #ccc; }
+        #chat-container { display: none; flex-direction: column; height: 70vh; }
+        #messages { flex-grow: 1; border: 1px solid #ddd; overflow-y: auto; padding: 10px; margin-bottom: 10px; }
+        .message { margin-bottom: 5px; } 
+        .my-message { text-align: right; color: blue; }
+        .other-message { text-align: left; color: green; }
+        #room-list li { cursor: pointer; padding: 5px; }
+        #room-list li:hover { background-color: #f0f0f0; }
+    </style>
+</head>
+<body>
+
+<h1>PlayMatch Chat Test</h1>
+
+<div id="login-area">
+    <h3>1. 로그인</h3>
+    <input type="text" id="email" placeholder="이메일 (user1@test.com)" value="user1@test.com">
+    <input type="password" id="password" placeholder="비밀번호 (password)" value="password">
+    <button onclick="login()">로그인</button>
+    <br><br>
+    <strong>JWT Token:</strong> <span id="token-display"></span>
+</div>
+
+<div class="container">
+    <div class="left-panel">
+        <div id="new-chat-area">
+            <h3>2. 새로운 채팅 시작</h3>
+            <input type="text" id="otherUserEmail" placeholder="상대방 이메일 (e.g., user2@test.com)">
+            <button onclick="startNewChat()">채팅 시작</button>
+        </div>
+
+        <div id="my-rooms-area">
+            <h3>3. 내 채팅방 목록</h3>
+            <button onclick="getMyRooms()">목록 새로고침</button>
+            <ul id="room-list"></ul>
+        </div>
+    </div>
+
+    <div class="right-panel">
+        <div id="chat-container">
+            <h3>채팅 - Room ID: <span id="room-id-display"></span></h3>
+            <div id="messages"></div>
+            <input type="text" id="message-input" placeholder="메시지 입력..." onkeyup="if(event.keyCode===13)sendMessage()">
+            <button onclick="sendMessage()">전송</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let stompClient = null;
+    let jwtToken = null;
+    let roomId = null;
+    let myUserEmail = null; // 로그인한 사용자 이메일
+    let myUserName = null;  // 로그인한 사용자 이름
+
+    function login() {
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+
+        fetch('/api/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+        }).then(response => {
+            if (response.ok) {
+                jwtToken = response.headers.get('Authorization');
+                document.getElementById('token-display').textContent = "OK";
+                alert('로그인 성공!');
+                myUserEmail = email; // 이메일 저장
+                // 간단하게 이름 추출 (실제로는 /api/users/me 호출 필요)
+                if(email.includes('1')) myUserName = '유저1'; 
+                if(email.includes('2')) myUserName = '유저2';
+                if(email.includes('3')) myUserName = '유저3';
+                getMyRooms(); // 로그인 성공 시 자동으로 채팅방 목록 로드
+            } else {
+                alert('로그인 실패');
+            }
+        });
+    }
+
+    function startNewChat() {
+        if (!jwtToken) { alert('먼저 로그인하세요.'); return; }
+        const otherUserEmail = document.getElementById('otherUserEmail').value;
+        if (!otherUserEmail) { alert('상대방 이메일을 입력하세요.'); return; }
+
+        fetch('/api/chat/rooms', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': jwtToken
+            },
+            body: JSON.stringify({ otherUserEmail: otherUserEmail })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.roomId === undefined) {
+                alert("에러: " + (data.message || "알 수 없는 오류"));
+                return;
+            }
+            alert(data.roomId + '번 채팅방이 생성/조회되었습니다.');
+            getMyRooms(); // 새 채팅방 생성 후 목록 새로고침
+            enterRoom(data.roomId);
+        });
+    }
+
+    function getMyRooms() {
+        if (!jwtToken) { alert('먼저 로그인하세요.'); return; }
+
+        fetch('/api/chat/my-rooms', {
+            headers: { 'Authorization': jwtToken }
+        })
+        .then(response => response.json())
+        .then(rooms => {
+            const roomList = document.getElementById('room-list');
+            roomList.innerHTML = '';
+            rooms.forEach(room => {
+                const li = document.createElement('li');
+                const participantNames = room.participants.map(p => p.name).join(', ');
+                li.textContent = `Room #${room.roomId} (참여자: ${participantNames})`;
+                li.onclick = () => enterRoom(room.roomId);
+                roomList.appendChild(li);
+            });
+        });
+    }
+
+    function enterRoom(selectedRoomId) {
+        if (stompClient) {
+            stompClient.disconnect(() => console.log('Disconnected before new connection.'));
+        }
+        roomId = selectedRoomId;
+        document.getElementById('room-id-display').textContent = roomId;
+        document.getElementById('chat-container').style.display = 'flex';
+        document.getElementById('messages').innerHTML = '';
+
+        connectAndSubscribe();
+        loadMessages();
+    }
+
+    function connectAndSubscribe() {
+        if (!roomId) { alert('채팅방을 선택하세요.'); return; }
+
+        const socket = new SockJS('/ws-stomp');
+        stompClient = Stomp.over(socket);
+
+        // 연결 시 헤더에 JWT 토큰 추가
+        stompClient.connect({ Authorization: jwtToken }, function (frame) {
+            console.log('Connected: ' + frame);
+            // 채팅방 구독
+            stompClient.subscribe('/sub/chat/room/' + roomId, function (message) {
+                showMessage(JSON.parse(message.body));
+            });
+        }, function(error) {
+            console.error('STOMP error: ' + error);
+            alert('채팅 서버 연결에 실패했습니다. JWT 토큰이 유효한지 확인하세요.');
+        });
+    }
+
+    function loadMessages() {
+        fetch('/api/chat/rooms/' + roomId + '/messages', {
+            headers: { 'Authorization': jwtToken }
+        })
+        .then(response => response.json())
+        .then(messages => {
+            messages.forEach(msg => showMessage(msg));
+        });
+    }
+
+    function sendMessage() {
+        if (!stompClient || !stompClient.connected) { alert('채팅 서버에 연결되지 않았습니다.'); return; }
+        const messageContent = document.getElementById('message-input').value;
+        if (messageContent && stompClient) {
+            const chatMessage = {
+                roomId: roomId,
+                senderEmail: myUserEmail, // 발신자 이메일 추가
+                message: messageContent
+            };
+            stompClient.send("/pub/chat/message", {}, JSON.stringify(chatMessage));
+            document.getElementById('message-input').value = '';
+        }
+    }
+
+    function showMessage(message) {
+        const messagesDiv = document.getElementById('messages');
+        const messageElement = document.createElement('div');
+        messageElement.classList.add('message');
+        
+        const senderText = document.createElement('strong');
+        senderText.textContent = message.senderName + ': ';
+        
+        const messageText = document.createElement('span');
+        messageText.textContent = message.message;
+
+        if (message.senderName === myUserName) { // 이름으로 비교
+            messageElement.classList.add('my-message');
+        } else {
+            messageElement.classList.add('other-message');
+        }
+
+        messageElement.appendChild(senderText);
+        messageElement.appendChild(messageText);
+        messagesDiv.appendChild(messageElement);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+
+</script>
+
+</body>
+</html>

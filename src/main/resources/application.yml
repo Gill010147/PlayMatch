@@ -1,0 +1,57 @@
+# --- Default (공통 설정) ---
+# 여기에 프로필을 지정하지 않았을 때 기본으로 사용될 설정을 넣습니다.
+spring:
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
+  # 기본 프로필을 'local'로 설정합니다.
+  # 이렇게 하면 IDE에서 그냥 실행했을 때 자동으로 local 설정으로 동작합니다.
+  profiles:
+    default: local
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+file:
+  upload-dir: ./uploads
+
+app:
+  base-url: http://localhost:8080 # 백엔드 기본 URL 설정
+
+logging:
+  level:
+    com.playmatch.playmatch.service.UserService: DEBUG # UserService 디버그 로그 활성화
+
+# --- 구분선 ---
+---
+
+# --- Local (내 PC에서 IDE로 직접 실행할 때) ---
+spring:
+  config:
+    activate:
+      on-profile: "local" # 'local' 프로필 활성화 시 이 설정 사용
+  datasource:
+    url: jdbc:postgresql://localhost:5434/playmatch_db # 내 PC의 Docker DB 주소
+    username: playmatch_user
+    password: ghkdqudrlf69150@@
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update # 실행 시점에 DB 테이블을 엔티티에 맞게 업데이트
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect # Dialect 명시적 설정
+  data:
+    redis:
+      host: localhost # 내 PC의 Docker Redis 주소
+      port: 6379
+
+jwt:
+  secret:
+    key: c3ByaW5nLWJvb3Qtc2VjdXJpdHktand0LXR1dG9yaWFsLWppd3QtdHV0b3JpYWwtc3ByaW5nLWJvb3Qtc2VjdXJpdHkK
+  token:
+    expiration-time: 3600000 # 1시간 (밀리초 단위)
+# --- 구분선 ---

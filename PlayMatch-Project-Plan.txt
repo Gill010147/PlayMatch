@@ -1,0 +1,185 @@
+# PlayMatch Project Plan - Capstone Project
+
+## Project Overview
+
+**Project Name:** PlayMatch (플레이매치)
+**Team:** 황병길 (202021087), 방승재 (202020914) 
+**Academic Status:** Software Engineering Major, Final Year Capstone Project
+**Supervisor:** Professor 백우진
+
+## Project Description
+
+PlayMatch is a web platform that combines "Play" and "Match" to help users easily find and connect for soccer and futsal games. The platform provides AI-based player matching and reservation system for sports facilities.
+
+## Problem Statement & Goals
+
+### Current Problems:
+1. Lack of automatic player matching functionality
+2. Difficulty in real-time communication for sports meetups
+3. Absence of trustworthy matching systems based on skills and reliability
+
+### Project Goals:
+- Provide location-based automatic team/player matching
+- Enable real-time communication between players and team leaders  
+- Implement AI-powered player recommendation system
+- Create comprehensive review and rating system for players, teams, and facilities
+
+## Technology Stack
+
+### Frontend:
+- ⚛️ React
+
+### Backend:
+- 🌱 Spring Boot
+- 🛡️ Spring Security
+- 📦 JPA (Java Persistence API)
+
+### Database:
+- 🐘 PostgreSQL (Main database)
+- 🚀 Redis (Real-time features)
+
+### Collaboration Tools:
+- 🐙 GitHub (Version control and collaboration)
+
+## System Architecture
+
+### User Types:
+1. **Individual Players** - People looking to join games as mercenaries
+2. **Team Leaders** - Users who organize teams and recruit players
+3. **Facility Managers** - Stadium/field operators managing reservations
+
+### Core Features:
+
+#### Individual Player Features:
+- Location-based game search
+- Mercenary participation application
+- Player review and rating system
+- Real-time chat functionality
+- Feedback board for sharing play videos
+- Chatbot-assisted profile creation
+
+#### Team Leader Features:
+- Game creation and team recruitment
+- Skill and position-based player search
+- Team invitation system
+- Post-game team management
+- Player review and rating
+
+#### Facility Manager Features:
+- Facility registration and information management
+- Reservation management system
+- Game approval/cancellation management
+- User feedback monitoring
+
+## Database Design
+
+### Key Entities:
+- **User** - Core user information with sports profiles
+- **Team** - Team information and leadership
+- **Facility** - Sports venue details and availability
+- **Match** - Game information and scheduling
+- **MatchParticipant** - Player participation in games
+- **Reserve** - Facility booking system
+- **PlayerMatching** - AI-powered player recommendations
+- **PlayerStats** - Player performance tracking
+- **Review** - Multi-directional rating system
+- **ChatRoom & Chat** - Real-time messaging system
+
+## AI Recommendation System
+
+### Technology: KNN (K-Nearest Neighbors) Algorithm
+### Features:
+- Position-based player matching
+- Skill level compatibility
+- Play style matching
+- Location proximity consideration
+- Performance history analysis
+
+## Competitive Analysis
+
+### Benchmarked Platforms:
+1. **Teamup** - Multi-sport team recruitment
+2. **Plab Football** - Simple soccer match organization  
+3. **LinkedIn** - Professional networking (for profile system inspiration)
+
+### PlayMatch Differentiation:
+1. Location-based automatic matching (vs manual posting)
+2. Enhanced individual profile management
+3. Real-time chat and notification system
+4. Comprehensive rating system (stars + reviews + reporting)
+
+## Non-Functional Requirements
+
+### Performance:
+- Page load time: Under 2 seconds
+- Concurrent users: 500+ simultaneous connections
+- Search response: Under 2 seconds
+
+### Security:
+- Personal data encryption
+- HTTPS protocol throughout
+- Strong authentication system
+- Clear role-based access control
+
+### Availability:
+- 99.9% uptime target
+- Regular data backup procedures
+- Disaster recovery protocols
+
+### Compatibility:
+- Cross-browser support (Chrome, Firefox, Safari, Edge)
+- Multi-OS compatibility (Windows, macOS, Linux)
+
+### Maintainability:
+- Well-structured, commented code
+- Git-based version control
+- Unit testing and integration testing capabilities
+
+## User Interface Design
+
+### Key Pages:
+1. **Home Page** - Match recommendations, sport type filtering
+2. **Login/Registration** - Social login integration
+3. **Player Search & Recommendation** - AI-powered matching interface
+4. **My Page** - Profile management and team registration
+5. **Game Creation** - Team leader game scheduling
+6. **Feedback Board** - Video sharing and community advice
+7. **Review System** - Post-game rating interface
+
+## Project Timeline
+
+The project follows a structured development schedule with clear milestones:
+- Requirements analysis and system design (Completed)
+- Database schema implementation
+- Backend API development
+- Frontend interface development
+- AI recommendation system integration
+- Testing and quality assurance
+- Deployment and documentation
+
+## Expected Outcomes
+
+### For Individual Players:
+- Easy access to nearby games matching their skill level
+- Improved gaming experience through reliable team matching
+- Community building through feedback and review systems
+
+### For Team Leaders:
+- Efficient player recruitment through AI recommendations
+- Streamlined team management tools
+- Quality assurance through player rating system
+
+### For Facility Managers:
+- Automated reservation management
+- Increased facility utilization
+- Community engagement through event promotion
+
+## Innovation Points
+
+1. **AI-Powered Matching**: Unlike manual posting systems, uses machine learning for optimal player-team matching
+2. **Multi-Stakeholder Platform**: Serves players, team leaders, and facility managers in one integrated system
+3. **Real-Time Communication**: Bridges the gap between matching and actual game coordination
+4. **Trust-Based System**: Comprehensive review system ensuring quality experiences
+5. **Location Intelligence**: Smart geographic matching for practical game participation
+
+This project represents a comprehensive solution to modern sports community organization challenges, combining traditional web development with AI technology to create meaningful connections in the sports community.

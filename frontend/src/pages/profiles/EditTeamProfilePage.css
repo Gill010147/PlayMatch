@@ -1,0 +1,86 @@
+/* EditTeamProfilePage.css */
+
+.edit-team-profile-container {
+    max-width: 720px;
+    margin: 24px auto;
+    padding: 24px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.edit-team-profile-container h2 {
+    text-align: center;
+    margin-bottom: 24px;
+}
+
+.edit-team-form {
+    display: grid;
+    gap: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #333;
+}
+
+.form-group input,
+.form-group textarea {
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 16px;
+    transition: border-color 0.2s;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #007bff;
+}
+
+.form-group textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+.save-button {
+    padding: 14px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.save-button:disabled {
+    background-color: #a0a0a0;
+    cursor: not-allowed;
+}
+
+.save-button:not(:disabled):hover {
+    background-color: #0056b3;
+}
+
+.error-message {
+    color: crimson;
+    text-align: center;
+    margin-top: 12px;
+}
+
+.team-logo-preview {
+    max-width: 200px;
+    height: auto;
+    border-radius: 8px;
+    margin: 0 auto 24px;
+    display: block;
+}

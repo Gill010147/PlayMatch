@@ -1,0 +1,7 @@
+/* src/index.css */
+/* 기본 스타일, 일단 빈 파일이어도 오류 해결됨 */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: Arial, Helvetica, sans-serif;
+}

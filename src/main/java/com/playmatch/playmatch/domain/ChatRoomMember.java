@@ -1,0 +1,39 @@
+package com.playmatch.playmatch.domain;
+
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "chat_room_members")
+@Getter
+@Setter // For relationship convenience methods
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+public class ChatRoomMember {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "chat_room_id", nullable = false)
+    private ChatRoom chatRoom;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
+    private LocalDateTime lastReadAt;
+
+    @Builder
+    public ChatRoomMember(ChatRoom chatRoom, User user) {
+        this.chatRoom = chatRoom;
+        this.user = user;
+        this.lastReadAt = LocalDateTime.now(); // 생성 시 현재 시간으로 초기화
+    }
+
+    public void updateLastReadAt() {
+        this.lastReadAt = LocalDateTime.now();
+    }
+}
