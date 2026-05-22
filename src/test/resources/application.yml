@@ -1,10 +1,12 @@
 spring:
+  config:
+    import: "optional:file:.env[.properties]"
   profiles:
     active: test
   datasource:
-    url: jdbc:postgresql://localhost:5434/playmatch_test
-    username: playmatch_user
-    password: ghkdqudrlf69150@@
+    url: jdbc:postgresql://localhost:5434/${POSTGRES_DB:playmatch_db}
+    username: ${POSTGRES_USER:playmatch_user}
+    password: ${POSTGRES_PASSWORD:change_me}
     driver-class-name: org.postgresql.Driver
 
   jpa:
@@ -37,7 +39,7 @@ file:
 
 jwt:
   secret:
-    key: c3ByaW5nLWJvb3Qtc2VjdXJpdHktand0LXR1dG9yaWFsLWppd3QtdHV0b3JpYWwtc3ByaW5nLWJvb3Qtc2VjdXJpdHkK
+    key: ${JWT_SECRET_KEY:c3ByaW5nLWJvb3Qtc2VjdXJpdHktand0LXR1dG9yaWFsLWppd3QtdHV0b3JpYWwtc3ByaW5nLWJvb3Qtc2VjdXJpdHkK}
   token:
     expiration-time: 3600000
 
