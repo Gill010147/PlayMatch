@@ -25,8 +25,11 @@ public class JwtUtil {
     public static final String AUTHORIZATION_KEY = "auth";
     public static final String BEARER_PREFIX = "Bearer ";
 
-    private String secretKey = "c3ByaW5nLWJvb3Qtc2VjdXJpdHktand0LXR1dG9yaWFsLWppd3QtdHV0b3JpYWwtc3ByaW5nLWJvb3Qtc2VjdXJpdHkK";
-    private long expirationTime = 3600000;
+    @Value("${jwt.secret.key}")
+    private String secretKey;
+
+    @Value("${jwt.token.expiration-time}")
+    private long expirationTime;
 
     private Key key;
     private final SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;

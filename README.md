@@ -80,67 +80,102 @@
 ### 사전 준비
 - Java 17
 - Node.js 20.x
-- Docker
+- Docker Desktop
 
-### 1. 데이터베이스 및 Redis 실행
+---
 
-프로젝트 루트의 `docker-compose.yml` 파일을 사용하여 PostgreSQL과 Redis를 실행합니다.
+### Step 1. 저장소 클론
 
 ```bash
-docker-compose up -d
+git clone https://github.com/GILL010147/PlayMatch.git
+cd PlayMatch
 ```
 
-### 2. 백엔드 서버 실행
+---
 
-1.  `build.gradle` 파일의 `plugins`가 아래와 같이 설정되어 있는지 확인합니다.
+### Step 2. 환경변수 파일 설정
 
-    ```groovy
-    plugins {
-        id 'java'
-        id 'org.springframework.boot' version '3.3.2'
-        id 'io.spring.dependency-management' version '1.1.5'
-    }
-    ```
+프로젝트 루트의 `.env.example`을 복사해서 `.env`를 만들고, 발급받은 실제 값을 채워넣습니다.
 
-2.  `src/main/resources/application.yml` 파일을 열어 본인의 환경에 맞게 수정합니다.
+```bash
+# Windows
+copy .env.example .env
 
-    ```yaml
-    spring:
-      datasource:
-        password: YOUR_DATABASE_PASSWORD # 여기에 본인의 DB 비밀번호를 입력하세요.
-    jwt:
-      secret:
-        key: YOUR_JWT_SECRET_KEY # 여기에 256비트 이상의 긴 무작위 문자열을 입력하세요.
-    ```
+# Mac / Linux
+cp .env.example .env
+```
 
-3.  아래 명령어로 백엔드 서버를 실행합니다. (기본 포트: `8080`)
+`.env` 파일을 열어 아래 항목을 채웁니다. (실제 값은 프로젝트 관리자에게 문의)
 
-    ```bash
-    ./gradlew bootRun
-    ```
+```
+SPRING_PROFILES_ACTIVE=local
+POSTGRES_DB=playmatch_db
+POSTGRES_USER=playmatch_user
+POSTGRES_PASSWORD=<관리자에게 받은 값>
+JWT_SECRET_KEY=<관리자에게 받은 값>
+```
 
-### 3. 프론트엔드 서버 실행
+---
 
-1.  `frontend` 디렉토리로 이동하여 의존성을 설치합니다.
+### Step 3. 데이터베이스 및 Redis 실행
 
-    ```bash
-    cd frontend
-    npm install
-    ```
+```bash
+docker-compose up -d postgres redis
+```
 
-2.  `frontend/.env` 파일을 생성하고, 백엔드 서버 주소를 입력합니다.
+정상 실행 확인:
 
-    ```
-    VITE_API_BASE_URL=http://localhost:8080
-    ```
+```bash
+docker ps
+# playmatch-postgres, playmatch-redis 두 컨테이너가 Up 상태여야 합니다.
+```
 
-3.  아래 명령어로 프론트엔드 개발 서버를 실행합니다. (기본 포트: `5173`)
+---
 
-    ```bash
-    npm run dev
-    ```
+### Step 4. 백엔드 서버 실행
 
-4.  브라우저에서 `http://localhost:5173`으로 접속합니다.
+```bash
+./gradlew bootRun
+```
+
+Windows PowerShell이면:
+
+```powershell
+.\gradlew.bat bootRun
+```
+
+서버가 뜨면 `http://localhost:8080` 에서 응답합니다.
+
+---
+
+### Step 5. 프론트엔드 서버 실행
+
+```bash
+cd frontend
+```
+
+`frontend/.env.example`을 복사해서 `frontend/.env`를 만듭니다.
+
+```bash
+# Windows
+copy .env.example .env
+
+# Mac / Linux
+cp .env.example .env
+```
+
+의존성 설치 후 개발 서버 실행:
+
+```bash
+npm install
+npm run dev
+```
+
+---
+
+### Step 6. 브라우저 접속
+
+`http://localhost:5173` 으로 접속합니다.
 
 ---
 
